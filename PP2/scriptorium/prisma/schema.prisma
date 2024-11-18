@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+//FIXME: We cannot use enums in sqlite
+// Therefore, we can only use strings here
+// NOTE: For User, role can take the following values: 
+// VISITOR
+// USER
+// ADMIN // Shortform for: System administrator
+
+
+// User schema
+model User {
+  id          Int        @id @default(autoincrement())
+  firstName   String                                     
+  lastName    String                                     
+  email       String     @unique // ASSUME: emails need to be unique
+  phoneNumber String                                     
+  password    String
+  avatar      String?    // Storing the file path to the avatar image (uploaded via Multer)                                
+  role        String     @default("USER")  // FIXME: Retaining type as String
+  createdAt   DateTime   @default(now()) // Not sure if these two attributes are needed, but could be useful on based on designs in lecture. 
+  updatedAt   DateTime   @updatedAt
+
+  // Defining the one to many relationships
+  blogPosts   BlogPost[] // A user can create many blog posts
+  comments    Comment[]  // A user can comment on many blog posts
+  ratings     Rating[]   // A user can leave many ratings on either blog posts or comments
+  reports     Report[]   // A user can leave many reports on either blog posts or comments
+  codeTemplates CodeTemplate[] // A user might want to create more than 1 code template
+}
+
+// Blog Post schema 
+model BlogPost {
+  id        Int       @id @default(autoincrement())
+  title     String
+  content   String
+  hidden    Boolean   @default(false) // Indicates if content is hidden
+  upvotes   Int       @default(0)
+  downvotes Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+
+  // Defining Foreign Key relationships
+  authorId  Int       // Foreign key to User
+  author    User      @relation(fields: [authorId], references: [id])
+  
+  // Defining the one to many relationships
+  tags      Tag[]
+  reports   Report[]
+  comments  Comment[] // One-to-many relation with comments
+  ratings   Rating[]   // Blog post can be rated
+  codeTemplateLinks CodeTemplate[] @relation("BlogPostCodeTemplates")
+}
+
+// Comment schema 
+model Comment {
+  id        Int       @id @default(autoincrement())
+  text      String
+  hidden    Boolean   @default(false) // Indicates if content is hidden
+  upvotes   Int       @default(0)
+  downvotes Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  // Defining Foreign Key relationships 
+  authorId  Int // Foreign key to User
+  author    User      @relation(fields: [authorId], references: [id]) // NOTE: This used to have onDelete cascade reference
+  postId    Int  // Foreign key to BlogPost
+  post      BlogPost  @relation(fields: [postId], references: [id])  // NOTE: This used to have onDelete cascade reference
+
+  // Defining the one to many relationships
+  reports   Report[]  // allowing comments to have multiple reports
+  ratings   Rating[]   // FIXME: Defining a new one-to-many relationship. Comments can be rated
+ 
+  parentId  Int?        // Optional field for replies
+  parent    Comment?    @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[]   @relation("CommentReplies")
+}
+
+// Report schema
+model Report {
+  id        Int       @id @default(autoincrement())
+  contentType  String   // Either "BlogPost" or "Comment"
+  explanation  String
+  
+  // Defining Foreign Key relationships 
+  userId        Int       // Foerign key to User
+  user        User      @relation(fields: [userId], references: [id]) // NOTE: This used to have onDelete cascade reference
+  blogPostId    Int?      // Foreign key to BlogPost
+  blogPost  BlogPost? @relation(fields: [blogPostId], references: [id]) // NOTE: This used to have onDelete cascade reference
+  commentId     Int?      // Foreign key to Comment
+  comment Comment?    @relation(fields: [commentId], references: [id]) // NOTE: This used to have onDelete cascade reference
+}
+
+//FIXME: New schema for the Rating
+// FIXME: Massive assumption: Assume that the ratings are done so in a binary fashion (only can upvote and downvote)
+model Rating {
+   id        Int       @id @default(autoincrement())
+   ratingValue Int //FIXME: Assume that this attribute can only take 2 values (0 for downvote, 1 for upvote)
+   
+   // Defining Foreign Key relationships 
+   userId      Int  // Foreign key to User 
+   user        User      @relation(fields: [userId], references: [id]) // NOTE: This used to have onDelete cascade reference
+   blogPostId    Int?      // Foreign key to BlogPost
+   blogPost  BlogPost? @relation(fields: [blogPostId], references: [id]) // NOTE: This used to have onDelete cascade reference 
+   commentId     Int?      // Foreign key to Comment
+   comment Comment?    @relation(fields: [commentId], references: [id]) // NOTE: This used to have onDelete cascade reference
+}
+
+// Tag Schema (since string lists can't be used as the type for tags in CodeTemplate)
+model Tag {
+  id      Int         @id @default(autoincrement())
+  name    String      @unique // Make name unique
+
+  // Defining Foreign Key relationships
+  blogPosts BlogPost[] // One to many relationship (1 tag can belong to more than 1 blog post)
+  CodeTemplates CodeTemplate[] // IF IMPLICIT, just replace it with CodeTemplates CodeTemplate[]
+}
+
+// Code Template Schema
+model CodeTemplate {
+  id          Int            @id @default(autoincrement())
+  title       String
+  explanation String
+  tags        Tag[]  // IF IMPLICIT, just replace it with tags Tag[]
+  code        String
+  language    String
+  isForked    Boolean       @default(false) 
+  // Defining Foreign Key relationships 
+  userId      Int          // Foreign key to User
+  user        User          @relation(fields: [userId], references: [id]) // NOTE: This used to have onDelete cascade reference
+  parentId    Int?         // Can be null since it may not have a parent.      
+  parent      CodeTemplate?  @relation("ForkedTemplates", fields: [parentId], references: [id])
+  children    CodeTemplate[] @relation("ForkedTemplates") // One-to-many relation for forked versions of the template
+  blogPostLinks   BlogPost[]   @relation("BlogPostCodeTemplates")
+}
