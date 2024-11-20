@@ -46,7 +46,8 @@ export default async function handler(req, res) {
 // Creating a new function that pulls out some of the existing handler code
 export async function executingCode(inputCode, language, stdin) {
     // Define a set of supported languages
-    const setOfSupportedLanguages = new Set(["c", "c++", "java", "python", "javascript", "ruby", "r"]);
+    const setOfSupportedLanguages = new Set(["c", "c++", "java", "python", "javascript", 
+        "ruby", "r", "rust"]);
 
     // Check if required fields are defined 
     if (!inputCode || !language) {
@@ -61,10 +62,10 @@ export async function executingCode(inputCode, language, stdin) {
     // Trying to execute the code
     try {
         const codeOutput = await executeCodeHelper(inputCode, language, stdin);
-        if (language === "java" || language === "c" || language === "c++") {
+        if (language === "java" || language === "c" || language === "c++"
+            || language === "rust") {
             await cleanUpTempCodeFiles(inputCode, language);
         }
-
         return codeOutput; // Directly return the result from executeCodeHelper
     } catch (error) {
         return { error: "Error encountered when executing code" };

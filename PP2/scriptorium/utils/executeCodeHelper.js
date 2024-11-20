@@ -86,20 +86,31 @@ function regexCleaningInput(language, inputString){
 
     else if (language === "ruby") {
         let cleanedInputString = inputString
-            .replace(/\\/g, '\\\\')   // Escape backslashes for JSON
-            .replace(/"/g, '\\"')     // Escape double quotes for JSON
-            .trim();                 // Trim any leading/trailing whitespace
+        ?.replace(/\\/g, '\\\\')   // Escape backslashes for JSON
+        ?.replace(/"/g, '\\"')     // Escape double quotes for JSON
+        ?.trim();                 // Trim any leading/trailing whitespace
         return cleanedInputString;
     }
 
     else if (language === "r"){
         let cleanedInputString = inputString
-        .replace(/\\/g, '\\\\')   // Escape backslashes
-        .replace(/"/g, '\\"')      // Escape double quotes
-        .replace(/\$/g, '\\$')        // Escape dollar signs
-        .trim();                  // Trim leading/trailing whitespace
+        ?.replace(/\\/g, '\\\\')   // Escape backslashes
+        ?.replace(/"/g, '\\"')      // Escape double quotes
+        ?.replace(/\$/g, '\\$')        // Escape dollar signs
+        ?.trim();                  // Trim leading/trailing whitespace
         return cleanedInputString
     }
+
+    // TODO: Check whether rust truly doesn't need escape characters
+    else if (language === "rust") {
+        let cleanedInputString = inputString
+            // Trim leading/trailing whitespace
+            .trim();                  
+        
+        return cleanedInputString;
+    }
+    
+    
 }
 
 /*
@@ -138,6 +149,15 @@ export async function cleanUpTempCodeFiles(inputCode, language){
         } catch (error) {
             console.error("Error deleting the temporary C++ file and executable:", error);
         }   
+    }
+    else if (language === "rust"){
+        const tempCFileName = "tempRustFile"
+        try {
+            await execAsync(`rm ${tempCFileName}.rs`);
+            await execAsync(`rm ${tempCFileName}`);
+        } catch (error) {
+            console.error("Error deleting the temporary Rust file and executable:", error);
+        }  
     }
 }
 
@@ -246,6 +266,19 @@ async function compileCode (inputCode, language, stdin){
         // Using Rscript to execute code
         // -e flag allows execution of R code passed as a string
         codeCommand = `echo "${cleanedStdin}" | Rscript -e "${cleanedInputCode}"`;
+    }
+    else if (language === "rust"){
+        // Rust requires compilation using `cargo` or `rustc`
+        // Write the code to a temporary file
+        const tempRustFileName = "tempRustFile.rs";
+        fs.writeFileSync(tempRustFileName, cleanedInputCode);
+
+        // Compile the Rust file using rustc (Rust's compiler)
+        const { stderr } = await execAsync(`rustc ${tempRustFileName}`);
+        warnings = stderr; // Capture any warnings from the compilation
+
+        // Run the compiled Rust program (default executable is the name of the source file without extension)
+        codeCommand = `echo "${cleanedStdin}" | ./tempRustFile`;  // The compiled executable will be `tempRustFile` by default
     }
     // Note: At least 1 of these else branches should be reached because the language validity check...
     //... is already done in method executingCode under file: executeCode.js
