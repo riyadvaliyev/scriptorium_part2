@@ -22,8 +22,13 @@ export default async function executeCodeHelper(inputCode, language, stdin) {
         // Execute the input command
         let { stdout, stderr } = await execAsync(codeCommand);
 
-        // Construct the result object
-        let result = { output: stdout}; // Include warnings in the result
+        // Construct the result object (initialize as empty object)
+        let result = {}
+
+        // Include stdout if included
+        if (stdout) {
+            result.output = stdout;
+        }
 
         // Handle any warnings if any
         if (warnings){
@@ -39,7 +44,7 @@ export default async function executeCodeHelper(inputCode, language, stdin) {
     
     catch (error) {
         // Handle any errors that occur during execution
-        return { output: null, error: error.message };
+        return {error: error.message };
     }
 
 }
@@ -77,6 +82,23 @@ function regexCleaningInput(language, inputString){
         ?.replace(/'/g, "\\'") // Escape single quotes
         ?.trim(); // Trim any leading or trailing whitespace
         return cleanedInputString;
+    }
+
+    else if (language === "ruby") {
+        let cleanedInputString = inputString
+            .replace(/\\/g, '\\\\')   // Escape backslashes for JSON
+            .replace(/"/g, '\\"')     // Escape double quotes for JSON
+            .trim();                 // Trim any leading/trailing whitespace
+        return cleanedInputString;
+    }
+
+    else if (language === "r"){
+        let cleanedInputString = inputString
+        .replace(/\\/g, '\\\\')   // Escape backslashes
+        .replace(/"/g, '\\"')      // Escape double quotes
+        .replace(/\$/g, '\\$')        // Escape dollar signs
+        .trim();                  // Trim leading/trailing whitespace
+        return cleanedInputString
     }
 }
 
@@ -213,6 +235,17 @@ async function compileCode (inputCode, language, stdin){
         warnings = stderr; // Store warnings from compilation
         // Execute the code found in the temporary file + with user args
         codeCommand = `echo "${cleanedStdin}" | ./${tempCppFileName}`;
+    }
+    else if (language === "ruby") {
+        // Ruby is an interpreted language (like Python, JS), so no need to compile
+        // Using the -w flag to enable warnings
+        codeCommand = `echo "${cleanedStdin}" | ruby -w -e "${cleanedInputCode}"`;
+    }
+    else if (language === "r") {
+        // Ruby is an interpreted language (like Python, JS), so no need to compile
+        // Using Rscript to execute code
+        // -e flag allows execution of R code passed as a string
+        codeCommand = `echo "${cleanedStdin}" | Rscript -e "${cleanedInputCode}"`;
     }
     // Note: At least 1 of these else branches should be reached because the language validity check...
     //... is already done in method executingCode under file: executeCode.js
