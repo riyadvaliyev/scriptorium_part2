@@ -48,21 +48,43 @@ const CodeEditor: React.FC<{onChange: (newCode: string) => void; codeInput: stri
 
 // RunCodeButton component to handle the alert functionality
 // Note: Since codeContent is a prop variable, need to wrap it in a React.FC definition
-const RunCodeButton = ({ codeContent }: { codeContent: string }) => {
-  const handleClick = () => {
-    alert("Code inputted: " + codeContent);
-  };
+const RunCodeButton = ({ onClick }: { onClick: () => void })  => {
+  return <button onClick={onClick}>Run Code</button>;
+};
 
-  return <button onClick={handleClick}>Run Code</button>;
+// Handler to send the code input to the backend API endpoint. reference file: api/executeCode.js
+// Argument codeContent: The code input
+// Argument codeLanguage: The language of the code being ran
+// Argument codeStdin: The standard input of the code being ra
+const handleRunCodeClick = async (codeContent: string, codeLanguage: string, codeStdin: string) => {
+  const endpointJsonStr = JSON.stringify({
+    inputCode: codeContent, 
+    language: codeLanguage,
+    stdin: codeStdin
+  })
+  try {
+    const response = await fetch("/api/executeCode", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: endpointJsonStr,
+    });
+
+    const data = await response.json();
+    alert(data.output || "No output returned"); // For now, display the output in an alert
+  } catch (error) {
+    alert("Error executing code. Please try again.");
+  }
 };
 
 // Main component to bring everything together
 const ExecuteCodePage: React.FC = () => {
 
   // TODO: Eventually, these would be populated by the template attributes
-  const codeLanguageFromTemplate = "python"; // FIXME: Placeholder. corresponds to the <code> attribute of the template
+  const codeLanguageFromTemplate = "javascript"; // FIXME: Placeholder. corresponds to the <code> attribute of the template
   // Defining the code Contnet state variable + function to manage state
-  const codeContentFromTemplate = "def hello_world():\n    print('Hello, world!')";
+  const codeContentFromTemplate = "console.warn(\"This is a warning message.\");\nconsole.log(\"Hello, World!\");";
   const [codeContent, handleCodeContentChange] = useCodeState(codeContentFromTemplate);
 
   return (
@@ -73,7 +95,7 @@ const ExecuteCodePage: React.FC = () => {
       <CodeEditor onChange={handleCodeContentChange} codeInput={codeContent}/>
       <br />
       {/* Button to trigger displaying the code, button logic stays in ExecuteCodePage */}
-      <RunCodeButton codeContent={codeContentFromTemplate} />
+      <RunCodeButton onClick={() => handleRunCodeClick(codeContent, codeLanguageFromTemplate, "")} />
       {/* Display the code below */}
       <p>{codeContent}</p>
     </div>
