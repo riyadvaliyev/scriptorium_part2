@@ -72,7 +72,7 @@ function regexCleaningInput(language, inputString){
         let cleanedInputString = inputString
         ?.replace(/\\/g, '\\\\') // Escape backslashes
         ?.replace(/"/g, '\\"') // Escape double quotes
-        ?.replace(/'/g, "\\'") // Escape single quotes
+        //?.replace(/'/g, "\\'") // Escape single quotes
         ?.trim(); // Trim any leading or trailing whitespace
         return cleanedInputString;
     }
