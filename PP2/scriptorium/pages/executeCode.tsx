@@ -28,6 +28,46 @@ const useCodeState = (initialCodeContent: string = "") => {
   return [codeContent, handleCodeContentChange] as const; 
 };
 
+// Custom hook to manage the stdinInput state
+// Unlike the one for useCodeState, no argumeents necessary here since the default value is just an empty string ("")
+const useStdinState = () => {
+  const [stdinContent, setStdinContent] = useState("");
+
+  function handleStdinContentChange(newStdinContent: string) {
+    setStdinContent(newStdinContent);
+  }
+
+  return [stdinContent, handleStdinContentChange] as const;
+};
+
+//TODO: Is there a better way of doing this
+// Custom hook to manage the stdOut content
+// No argument here since the default value is just an empty string ("")
+// NOTE: This is a READY ONLY VALUE
+const useStdOutState = () => {
+  const [stdoutContent, setStdoutContent] = useState("");
+
+  function handleStoutContentChange(newStdoutContent: string) {
+    setStdoutContent(newStdoutContent);
+  }
+
+  return [stdoutContent, handleStoutContentChange] as const;
+};
+
+//TODO: Is there a better way of doing this
+// Custom hook to manage the stderr content
+// No argument here since the default value is just an empty string ("")
+// NOTE: This is a READY ONLY VALUE
+const useStderrState = () => {
+  const [stderrContent, setStderrContent] = useState("");
+
+  function handleStderrContentChange(newStderrContent: string) {
+    setStderrContent(newStderrContent);
+  }
+  return [stderrContent, handleStderrContentChange] as const;
+};
+
+//CodeEditor instance: A glorified text box where raw code can be inputted (can either be typed out by user or imported via code template)
 // Define the types for the props of the CodeEditor component
 // Arguments for the CodeEditor
 // #1: onChange: Is a function that takes a newCode argument. This denotes the handler that CHANGES the code content of the template
@@ -46,6 +86,39 @@ const CodeEditor: React.FC<{onChange: (newCode: string) => void; codeInput: stri
   />
 );
 
+
+// StdinEditor instance: A glorified text box where user can input text (to represent the content of stdin)
+const StdinEditor: React.FC<{onChange: (newStdin: string) => void;}> = ({ onChange}) => (
+  <AceEditor
+    mode="text" // Since stdin is plain text, we use the 'text' mode
+    theme="solarized_light" // Same theme as CodeEditor
+    name="stdin-editor"
+    editorProps={{ $blockScrolling: true }}
+    width="50%"
+    height="200px" // A smaller height for stdin input
+    onChange={onChange} // Pass the onChange handler function
+  />
+);
+
+//CodeOutput instance: A glorified text box where user can display stdOut and stdErrpr content
+const OutputEditor: React.FC<{ stdoutContent: string; stderrContent: string }> = ({ stdoutContent, stderrContent }) => {
+  // Combine standard output and error with labels
+  const combinedOutput = `Standard Output:\n${stdoutContent}\n\nStandard Error:\n${stderrContent}`;
+  return (
+    <AceEditor
+      mode="text"
+      theme="solarized_light"
+      name="output-editor"
+      editorProps={{ $blockScrolling: true }}
+      width="50%"
+      height="200px"
+      value={combinedOutput}
+      readOnly={true}
+    />
+  );
+};
+
+
 // RunCodeButton component to handle the alert functionality
 // Note: Since codeContent is a prop variable, need to wrap it in a React.FC definition
 const RunCodeButton = ({ onClick }: { onClick: () => void })  => {
@@ -56,7 +129,10 @@ const RunCodeButton = ({ onClick }: { onClick: () => void })  => {
 // Argument codeContent: The code input
 // Argument codeLanguage: The language of the code being ran
 // Argument codeStdin: The standard input of the code being ra
-const handleRunCodeClick = async (codeContent: string, codeLanguage: string, codeStdin: string) => {
+const handleRunCodeClick = async (codeContent: string, codeLanguage: string, codeStdin: string,
+  setStdoutContent: any, //FIXME: Used any to suppress the warnings
+  setStderrContent: any  //FIXME: Used any to suppress the warnings
+) => {
   const endpointJsonStr = JSON.stringify({
     inputCode: codeContent, 
     language: codeLanguage,
@@ -73,11 +149,16 @@ const handleRunCodeClick = async (codeContent: string, codeLanguage: string, cod
     });
     // Await for the JSON output
     const data = await response.json();
+
+    // Setting the stdoutContent and stderrContent variables using the setter functions
+    setStdoutContent(data.output || "No output returned");
+    setStderrContent(data.error || "No errors");
+
     // FIXME: Temporary alert to test output
-    alert(
-      `Output (Standard output): ${data.output || "No output returned"}\n` +
-      `Warnings and/or Errors (Standard error): ${data.error || "No errors"}`
-    );
+    // alert(
+    //   `Output (Standard output): ${data.output || "No output returned"}\n` +
+    //   `Warnings and/or Errors (Standard error): ${data.error || "No errors"}`
+    // );
   } catch (error) {
     alert("Error executing code. Please try again.");
   }
@@ -87,22 +168,45 @@ const handleRunCodeClick = async (codeContent: string, codeLanguage: string, cod
 const ExecuteCodePage: React.FC = () => {
 
   // TODO: Eventually, these would be populated by the template attributes
-  const codeLanguageFromTemplate = "python"; // FIXME: Placeholder. corresponds to the <code> attribute of the template
-  // Defining the code Contnet state variable + function to manage state
-  const codeContentFromTemplate = "def my_function() print(\"Hello, World!\")";
+  const codeLanguageFromTemplate = "c"; // FIXME: Placeholder. corresponds to the <code> attribute of the template
+  
+  // Defining the code content state variable + function to manage state
+  const codeContentFromTemplate = "for i in range(1, 10):\n\tx = input()\n\tprint(x)";
   const [codeContent, handleCodeContentChange] = useCodeState(codeContentFromTemplate);
+
+  // Defining the stdin content state variable + function to manage state
+  const [stdinContent, handleStdinContentChange] = useStdinState();
+
+  // Defining the stdout and stderror content state variables + functions to manage state
+  const [stdoutContent, setStdoutContent] = useStdOutState();
+  const [stderrContent, setStderrContent] = useStderrState();
 
   return (
     <div>
       <h1>Code execution page</h1>
       <br />
+      <br />
       {/* Code editor component, passing the change handler */}
+      <h3>Code input box: </h3>
       <CodeEditor onChange={handleCodeContentChange} codeInput={codeContent}/>
       <br />
+      {/* Stdin editor component, passing the change handler */}
+      <h3>Standard Input box: </h3>
+      <StdinEditor onChange={handleStdinContentChange}/>
+      <br />
+      <OutputEditor stdoutContent={stdoutContent} stderrContent={stderrContent} />
+      <br />
+      <br />
+      <br/>
       {/* Button to trigger displaying the code, button logic stays in ExecuteCodePage */}
-      <RunCodeButton onClick={() => handleRunCodeClick(codeContent, codeLanguageFromTemplate, "")} />
+      <RunCodeButton onClick={() => handleRunCodeClick(codeContent, codeLanguageFromTemplate, stdinContent, setStdoutContent, setStderrContent)} />
+      <br />
+      <h3>TEMPORARY TAGS: Printing out the raw output for both code content and stdin content:</h3>
       {/* Display the code below */}
       <p>{codeContent}</p>
+      <p>{stdinContent}</p>
+      <br />
+
     </div>
   );
 };
