@@ -63,6 +63,7 @@ const handleRunCodeClick = async (codeContent: string, codeLanguage: string, cod
     stdin: codeStdin
   })
   try {
+    // Construct the method and header for the intended response
     const response = await fetch("/api/executeCode", {
       method: "POST",
       headers: {
@@ -70,9 +71,13 @@ const handleRunCodeClick = async (codeContent: string, codeLanguage: string, cod
       },
       body: endpointJsonStr,
     });
-
+    // Await for the JSON output
     const data = await response.json();
-    alert(data.output || "No output returned"); // For now, display the output in an alert
+    // FIXME: Temporary alert to test output
+    alert(
+      `Output (Standard output): ${data.output || "No output returned"}\n` +
+      `Warnings and/or Errors (Standard error): ${data.error || "No errors"}`
+    );
   } catch (error) {
     alert("Error executing code. Please try again.");
   }
@@ -82,9 +87,9 @@ const handleRunCodeClick = async (codeContent: string, codeLanguage: string, cod
 const ExecuteCodePage: React.FC = () => {
 
   // TODO: Eventually, these would be populated by the template attributes
-  const codeLanguageFromTemplate = "javascript"; // FIXME: Placeholder. corresponds to the <code> attribute of the template
+  const codeLanguageFromTemplate = "python"; // FIXME: Placeholder. corresponds to the <code> attribute of the template
   // Defining the code Contnet state variable + function to manage state
-  const codeContentFromTemplate = "console.warn(\"This is a warning message.\");\nconsole.log(\"Hello, World!\");";
+  const codeContentFromTemplate = "def my_function() print(\"Hello, World!\")";
   const [codeContent, handleCodeContentChange] = useCodeState(codeContentFromTemplate);
 
   return (
