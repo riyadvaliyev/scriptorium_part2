@@ -38,8 +38,9 @@ export default async function handler(req, res) {
     }
 
     try {
+        // console.log(verified_token.id);
         const filter_settings = {
-            userId: verified_token.userId,
+            userId: verified_token.id,
         }
         if (title) {
             filter_settings.title = {
