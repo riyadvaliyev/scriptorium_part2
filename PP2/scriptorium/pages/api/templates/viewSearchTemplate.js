@@ -20,7 +20,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ message: "Must be a GET request." });
     }
 
-    const { title, explanation, tempTags, page, pageSize } = req.query;
+    const { title, explanation, tags, page, pageSize } = req.query;
     const verified_token = verifyToken(req, res);
 
     if (!verified_token) {
@@ -31,8 +31,10 @@ export default async function handler(req, res) {
     const intPageSize = parseInt(pageSize) || 10;
     const skip = (intPage - 1) * intPageSize;
 
-    if (tempTags && !Array.isArray(tempTags)) {
-        var tags = [tempTags];
+    if (tags && !Array.isArray(tags)) {
+        var tags_arr = [tags];
+    } else if (tags) {
+        var tags_arr = tags
     }
 
     try {
@@ -52,9 +54,9 @@ export default async function handler(req, res) {
 
         if (tags) {
             filter_settings.tags = {
-                every: {
+                some: {
                     name: {
-                        in: tags,
+                        in: tags_arr,
                     }
                 }
             }
