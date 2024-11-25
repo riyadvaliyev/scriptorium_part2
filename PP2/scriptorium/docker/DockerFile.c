@@ -4,6 +4,12 @@ FROM gcc:11.4
 # Install timeout command (part of coreutils)
 RUN apt-get update && apt-get install -y coreutils
 
+# Create a non-root user and set it as the current user
+RUN useradd -m nonrootuser
+
+# Switch to the non-root user
+USER nonrootuser
+
 # Set the working directory inside the container
 WORKDIR /scriptorium_docker_files
 
