@@ -14,9 +14,36 @@ import fs from 'fs'; // java specific import
 // Reason: Makes it easier to AWAIT output executed from exec. Allows us to use words like async and await
 const execAsync = promisify(exec);
 
+// Helper method to check whether the inputCode contains any directory commands
+function containsProhibitedCommands(inputString) {
+    // Define prohibited commands regex
+    const prohibitedCommands = /\b(ls|cd|pwd|rm|rmdir|mv|shutdown|reboot|kill|chown|chmod)\b/g;
+
+    // Find all matches for prohibited commands
+    const matches = inputString.match(prohibitedCommands);
+
+    // Return an object with a flag and the matches
+    return {
+        hasProhibitedCommands: matches !== null,
+        flaggedCommands: matches || [] // Return an empty array if no matches are found
+    };
+}
+
+
+
 //Actual code executer helper method execution
 export default async function executeCodeHelper(inputCode, language, stdin) {
     try {
+            
+        // Adding an additional regex check to "block" off any directory or file changing commands
+        // This is for isolation (to ensure that the user cannot maliciosly delete stuff in the container)
+        let prohibitedCommandsMatchResult = containsProhibitedCommands(inputCode);
+        if (prohibitedCommandsMatchResult.hasProhibitedCommands){
+            let result = {}
+            result.error = "You cannot use these commands: " + prohibitedCommandsMatchResult.flaggedCommands.join(", ");
+            return result;
+        }
+
         // Call the compileCode method to compile the code
         let { codeCommand, warnings } = await dockerCompileCode(inputCode, language, stdin);
 
@@ -68,7 +95,7 @@ function regexCleaningInput(language, inputString){
     // Note: Using the optional chaining operator (?.) to safely handle cases where inputString is null
     //FIXME: One massive assumption: We assume all lines of code are escaped by a \n, therefore the regex does NOT escape them
     //FIXME: Likely need to work on further refining the regex
-    
+
     if (language === "python" || language === "javascript"){
         let cleanedInputString = inputString
         ?.replace(/\\/g, '\\\\') // Escape backslashes
