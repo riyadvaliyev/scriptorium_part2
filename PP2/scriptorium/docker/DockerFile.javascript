@@ -5,11 +5,11 @@ FROM node:20-slim
 RUN apt-get update && apt-get install -y coreutils
 
 # Set the working directory inside the container
-WORKDIR /scriptorium
+WORKDIR /scriptorium_docker_files
 
 # Copy any necessary files 
 # In this case, this copies all files in the scriptorium directory
-COPY . .
+COPY . . 
 
 # Verify the Node.js installation
 RUN node --version

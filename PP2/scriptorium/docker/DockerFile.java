@@ -7,9 +7,9 @@ FROM openjdk:11-slim
 RUN apt-get update && apt-get install -y coreutils
 
 # Set the working directory inside the container
-WORKDIR /scriptorium
+WORKDIR /scriptorium_docker_files
 
-# Copy any necessary files (optional, for example, code or scripts)
+# In this case, this copies all files in the current directory (docker)
 COPY . .
 
 # Verify the Java installation

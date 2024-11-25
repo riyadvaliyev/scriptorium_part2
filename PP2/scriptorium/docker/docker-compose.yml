@@ -29,7 +29,6 @@ services:
         limits:
           memory: 512m  # Set memory limit to 512 MB
 
-
   java_service:
     build:
       context: .  # Set the context to the current folder (docker)
@@ -44,19 +43,19 @@ services:
         limits:
           memory: 512m  # Set memory limit to 512 MB
 
-
-  # FIXME: Commented out for now, might not need this yet
-  # api_service:
-  #   build:
-  #     context: ..  # Set context to the parent directory
-  #     dockerfile: docker/DockerFile.apicontainer  # Path to Dockerfile in the 'docker' folder
-  #   container_name: api_container
-  #   networks:
-  #     - scriptorium_network
-  #   ports:
-  #     - "3000:3000"
-  #   tty: true  # Keeps the container running
-  #   command: ["npm", "run", "dev"]
+  c_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.c  # Path to the Dockerfile for C
+    container_name: c_container
+    image: c_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          memory: 512m  # Set memory limit to 512 MB
 
 networks:
   scriptorium_network:
