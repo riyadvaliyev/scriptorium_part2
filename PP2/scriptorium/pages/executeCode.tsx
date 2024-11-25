@@ -168,10 +168,10 @@ const handleRunCodeClick = async (codeContent: string, codeLanguage: string, cod
 const ExecuteCodePage: React.FC = () => {
 
   // TODO: Eventually, these would be populated by the template attributes
-  const codeLanguageFromTemplate = "c"; // FIXME: Placeholder. corresponds to the <code> attribute of the template
+  const codeLanguageFromTemplate = "python"; // FIXME: Placeholder. corresponds to the <code> attribute of the template
   
   // Defining the code content state variable + function to manage state
-  const codeContentFromTemplate = "for i in range(1, 10):\n\tx = input()\n\tprint(x)";
+  const codeContentFromTemplate = "print('Hello World')";
   const [codeContent, handleCodeContentChange] = useCodeState(codeContentFromTemplate);
 
   // Defining the stdin content state variable + function to manage state
