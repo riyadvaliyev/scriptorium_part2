@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  python_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.python  # Path to the Dockerfile in the current folder
+    container_name: python_container
+    image: python_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+
+  javascript_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.javascript  # Path to the Dockerfile in the current folder
+    container_name: javascript_container
+    image: javascript_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+
+  # FIXME: Commented out for now, might not need this yet
+  # api_service:
+  #   build:
+  #     context: ..  # Set context to the parent directory
+  #     dockerfile: docker/DockerFile.apicontainer  # Path to Dockerfile in the 'docker' folder
+  #   container_name: api_container
+  #   networks:
+  #     - scriptorium_network
+  #   ports:
+  #     - "3000:3000"
+  #   tty: true  # Keeps the container running
+  #   command: ["npm", "run", "dev"]
+
+networks:
+  scriptorium_network:
+    driver: bridge

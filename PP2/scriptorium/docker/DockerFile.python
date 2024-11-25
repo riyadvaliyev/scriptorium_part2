@@ -1,0 +1,14 @@
+# Use the official Python base image
+FROM python:3.11-slim
+
+# Set the working directory inside the container
+WORKDIR /scriptorium
+
+# Copy any necessary files (optional, for example, scripts or dependencies)
+COPY . .
+
+# Verify the Python installation
+RUN python --version
+
+# Default command to keep the container running (optional)
+CMD ["bash"]

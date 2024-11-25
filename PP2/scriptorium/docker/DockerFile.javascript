@@ -1,0 +1,17 @@
+# Use the official Node.js slim base image (version 20 or above)
+FROM node:20-slim
+
+# Set the working directory inside the container
+WORKDIR /scriptorium
+
+# Copy any necessary files (optional, for example, scripts or dependencies)
+COPY . .
+
+# Verify the Node.js installation
+RUN node --version
+
+# Verify the npm installation
+RUN npm --version
+
+# Default command to keep the container running (optional)
+CMD ["bash"]
