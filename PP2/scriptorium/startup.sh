@@ -22,10 +22,6 @@ npx prisma generate
 # Create the admin user (if applicable)
 node createAdmin.js
 
-# Set up Docker containers using docker-compose
-# Navigate to the directory where the docker-compose.yml is located 
-# In this case, this directory is 1 level deeper inside the docker folder
-cd docker
-
 # Start up Docker containers
-docker-compose up --build -d  # -d means to run the containers in detatched mode (frees the terminal to do other things)
+# Note: Even thought the docker containers are in the docker folder, we're still running them in the current directory
+docker-compose -f docker/docker-compose.yml up --build -d  # -d means to run the containers in detatched mode (frees the terminal to do other things)
