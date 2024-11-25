@@ -113,6 +113,56 @@ function regexCleaningInput(language, inputString){
     
 }
 
+/*
+    Function to delete any temporary generated files for code execution.
+    Used for the following languages:
+        - Java 
+        - C
+        - C++
+*/
+export async function cleanUpTempCodeFiles(inputCode, language){
+    if (language === "java") {
+        let cleanedInputCode = regexCleaningInput(language, inputCode);
+        let findingJavaClassName = cleanedInputCode.match(/public\s+class\s+(\w+)/);
+        let tempJavaFileName = findingJavaClassName[1];
+        
+        try {
+            // Remove both the .java and .class files inside the container
+            await execAsync(`docker exec -i java_container rm /tmp/${tempJavaFileName}.java`);
+            await execAsync(`docker exec -i java_container rm /tmp/${tempJavaFileName}.class`);
+        } catch (error) {
+            console.error("Error deleting the temporary Java file and class:", error);
+        }
+    }    
+    else if (language === "c"){
+        const tempCFileName = "tempCFile"
+        try {
+            await execAsync(`rm ${tempCFileName}.c`);
+            await execAsync(`rm ${tempCFileName}`);
+        } catch (error) {
+            console.error("Error deleting the temporary C file and executable:", error);
+        }     
+    }
+    else if (language === "c++"){
+        const tempCFileName = "tempCppFile"
+        try {
+            await execAsync(`rm ${tempCFileName}.cpp`);
+            await execAsync(`rm ${tempCFileName}`);
+        } catch (error) {
+            console.error("Error deleting the temporary C++ file and executable:", error);
+        }   
+    }
+    else if (language === "rust"){
+        const tempCFileName = "tempRustFile"
+        try {
+            await execAsync(`rm ${tempCFileName}.rs`);
+            await execAsync(`rm ${tempCFileName}`);
+        } catch (error) {
+            console.error("Error deleting the temporary Rust file and executable:", error);
+        }  
+    }
+}
+
 // Helper method to generate the Docker execution command
 async function dockerCompileCode(inputCode, language, stdin) {
     // Defining a variable to store the command to compile the code
@@ -129,8 +179,12 @@ async function dockerCompileCode(inputCode, language, stdin) {
     let imageName;
     if (language === "python") {
         imageName = "python_image"; 
-    } else if (language === "javascript") {
+    } 
+    else if (language === "javascript") {
         imageName = "javascript_image"; 
+    }
+    else if (language === "java"){
+        imageName = "java_image";
     }
     
     // Determine the docker execution command to run
@@ -147,6 +201,23 @@ async function dockerCompileCode(inputCode, language, stdin) {
         // The "-e" flag, like how -c is used for python, tells node.js to execute the command 
         // codeCommand = `echo "${cleanedStdin}" | docker run --rm -i ${imageName} node -e "${cleanedInputCode}"`; 
         codeCommand = `echo "${cleanedStdin}" | docker exec -i javascript_container node -e "${cleanedInputCode}"`;
+    }
+
+    else if (language === "java"){
+        // Extract Java class name (assuming class is named in the public class definition)
+        let findingJavaClassName = cleanedInputCode.match(/public\s+class\s+(\w+)/);
+        let tempJavaFileName = findingJavaClassName[1];
+
+        // Write the Java code to a temporary file inside the container
+        await execAsync(`docker exec -i java_container bash -c 'echo "${cleanedInputCode}" > /tmp/${tempJavaFileName}.java'`);
+
+        // Compile the Java code inside the container
+        // We use -Xlint:unchecked to show warnings (if any)
+        const { stderr } = await execAsync(`docker exec -i java_container javac -Xlint:unchecked /tmp/${tempJavaFileName}.java`);
+        warnings = stderr; // Store any compilation warnings
+
+        // Run the Java code (passing stdin via echo)
+        codeCommand = `echo "${cleanedStdin}" | docker exec -i java_container java -cp /tmp ${tempJavaFileName}`;
     }
     return { codeCommand, warnings }
 
