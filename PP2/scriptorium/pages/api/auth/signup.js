@@ -26,7 +26,7 @@ export default async function handler(req, res) {
         const refreshToken = jwt.sign({ id: user.id, role: user.role }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
   
         // Send success response if user creation is successful
-        return res.status(201).json({ accessToken, refreshToken });
+        return res.status(201).json({ id: user.id, accessToken, refreshToken });
       } catch (error) {
         // Log the error to identify its source
         console.error("Signup error:", error);
