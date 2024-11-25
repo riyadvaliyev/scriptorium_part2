@@ -4,7 +4,8 @@ FROM node:20-slim
 # Set the working directory inside the container
 WORKDIR /scriptorium
 
-# Copy any necessary files (optional, for example, scripts or dependencies)
+# Copy any necessary files 
+# In this case, this copies all files in the scriptorium directory
 COPY . .
 
 # Verify the Node.js installation

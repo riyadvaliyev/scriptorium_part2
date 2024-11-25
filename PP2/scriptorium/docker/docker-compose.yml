@@ -21,6 +21,16 @@ services:
       - scriptorium_network
     tty: true  # Keeps the container running
 
+  java_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.java  # Path to the Dockerfile in the current folder (assuming it's named DockerFile.java)
+    container_name: java_container
+    image: java_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+
   # FIXME: Commented out for now, might not need this yet
   # api_service:
   #   build:
