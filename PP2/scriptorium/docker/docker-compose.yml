@@ -10,6 +10,10 @@ services:
     networks:
       - scriptorium_network
     tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          memory: 512m  # Set memory limit to 512 MB
 
   javascript_service:
     build:
@@ -20,6 +24,11 @@ services:
     networks:
       - scriptorium_network
     tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          memory: 512m  # Set memory limit to 512 MB
+
 
   java_service:
     build:
@@ -30,6 +39,11 @@ services:
     networks:
       - scriptorium_network
     tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          memory: 512m  # Set memory limit to 512 MB
+
 
   # FIXME: Commented out for now, might not need this yet
   # api_service:

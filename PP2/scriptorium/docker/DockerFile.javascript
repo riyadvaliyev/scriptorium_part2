@@ -1,6 +1,9 @@
 # Use the official Node.js slim base image (version 20 or above)
 FROM node:20-slim
 
+# Install timeout command (part of coreutils)
+RUN apt-get update && apt-get install -y coreutils
+
 # Set the working directory inside the container
 WORKDIR /scriptorium
 

@@ -3,6 +3,9 @@
 # Use the official OpenJDK base image
 FROM openjdk:11-slim
 
+# Install timeout command (part of coreutils)
+RUN apt-get update && apt-get install -y coreutils
+
 # Set the working directory inside the container
 WORKDIR /scriptorium
 
