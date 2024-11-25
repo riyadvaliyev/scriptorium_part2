@@ -191,16 +191,15 @@ async function dockerCompileCode(inputCode, language, stdin) {
     if (language === "python"){
         // the -c command tells python to execute inputCode as a string not a file
         // Futhermore, need to put "" around the template literal (${}) to make it interpret as a string
-        // codeCommand = `python3 -c "${cleanedInputCode}"`; 
-        // codeCommand = `echo "${cleanedStdin}" | docker run --rm -i ${imageName} python3 -c "${cleanedInputCode}"`
-        codeCommand = `echo "${cleanedStdin}" | docker exec -i python_container python3 -c "${cleanedInputCode}"`;
-
+        // codeCommand = `echo "${cleanedStdin}" | docker exec -i python_container python3 -c "${cleanedInputCode}"`;
+        codeCommand = `docker exec -i python_container bash -c "echo '${cleanedStdin}' | timeout --signal=SIGKILL 1m python3 -c '${cleanedInputCode}'"`;
     }
     else if (language === "javascript"){
         // We use node.js to run javascript commands
         // The "-e" flag, like how -c is used for python, tells node.js to execute the command 
         // codeCommand = `echo "${cleanedStdin}" | docker run --rm -i ${imageName} node -e "${cleanedInputCode}"`; 
-        codeCommand = `echo "${cleanedStdin}" | docker exec -i javascript_container node -e "${cleanedInputCode}"`;
+        // codeCommand = `echo "${cleanedStdin}" | docker exec -i javascript_container node -e "${cleanedInputCode}"`;
+        codeCommand = `docker exec -i javascript_container bash -c "echo '${cleanedStdin}' | timeout --signal=SIGKILL 1m node -e '${cleanedInputCode}'"`;
     }
 
     else if (language === "java"){
@@ -217,7 +216,9 @@ async function dockerCompileCode(inputCode, language, stdin) {
         warnings = stderr; // Store any compilation warnings
 
         // Run the Java code (passing stdin via echo)
-        codeCommand = `echo "${cleanedStdin}" | docker exec -i java_container java -cp /tmp ${tempJavaFileName}`;
+        // codeCommand = `echo "${cleanedStdin}" | docker exec -i java_container java -cp /tmp ${tempJavaFileName}`;
+        codeCommand = `docker exec -i java_container bash -c "echo '${cleanedStdin}' | timeout --signal=SIGKILL 1m java -cp /tmp ${tempJavaFileName}"`;
+
     }
     return { codeCommand, warnings }
 
