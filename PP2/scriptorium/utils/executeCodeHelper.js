@@ -232,6 +232,9 @@ async function dockerCompileCode(inputCode, language, stdin) {
     else if (language === "c++"){
         containerName = "cpp_container";
     }
+    else if (language === "ruby"){
+        containerName = "ruby_container";
+    }
     
     // Determine the docker execution command to run
     if (language === "python"){
@@ -300,6 +303,18 @@ async function dockerCompileCode(inputCode, language, stdin) {
         // Run the compiled C++ code with a timeout of 20 seconds
         codeCommand = `echo '${cleanedStdin}' | docker exec -i '${containerName}' timeout --signal=SIGKILL 20s sh -c '/tmp/${tempCppFileName}'`;
     }
+    else if (language === "ruby") {
+        // Ruby is an interpreted language (like Python), so no need to compile
+        // The -e flag tells Ruby to execute the input code as a string
+        // Using timeout to limit execution time and echo for stdin handling
+        codeCommand = `docker exec -i '${containerName}' bash -c "echo '${cleanedStdin}' | timeout --signal=SIGKILL 20s ruby -w -e '${cleanedInputCode}'"`;
+    }
+    
+    //     else if (language === "ruby") {
+//         // Ruby is an interpreted language (like Python, JS), so no need to compile
+//         // Using the -w flag to enable warnings
+//         codeCommand = `echo "${cleanedStdin}" | ruby -w -e "${cleanedInputCode}"`;
+//     }
     
     return { codeCommand, warnings }
 

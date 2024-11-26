@@ -32,7 +32,7 @@ services:
   java_service:
     build:
       context: .  # Set the context to the current folder (docker)
-      dockerfile: DockerFile.java  # Path to the Dockerfile in the current folder (assuming it's named DockerFile.java)
+      dockerfile: DockerFile.java  # Path to the Dockerfile in the current folder
     container_name: java_container
     image: java_image
     networks:
@@ -56,13 +56,27 @@ services:
       resources:
         limits:
           memory: 512m  # Set memory limit to 512 MB
-  
+
   cpp_service:
     build:
       context: .  # Set the context to the current folder (docker)
-      dockerfile: DockerFile.cpp  # Path to the Dockerfile for C
+      dockerfile: DockerFile.cpp  # Path to the Dockerfile for C++
     container_name: cpp_container
     image: cpp_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          memory: 512m  # Set memory limit to 512 MB
+
+  ruby_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.ruby  # Path to the Dockerfile for Ruby
+    container_name: ruby_container
+    image: ruby_image
     networks:
       - scriptorium_network
     tty: true  # Keeps the container running
