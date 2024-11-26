@@ -22,7 +22,7 @@ import "ace-builds/src-noconflict/mode-rust";  // For Rust
 import "ace-builds/src-noconflict/mode-r";  // For R
 import "ace-builds/src-noconflict/mode-ruby";  // For Ruby
 import "ace-builds/src-noconflict/mode-csharp";  // For C#
-import "ace-builds/src-noconflict/mode-go";  // For Go
+import "ace-builds/src-noconflict/mode-golang"; // For Go
 // Loading the styling for the text boxes
 import "ace-builds/src-noconflict/theme-solarized_light"; // Loading the Solarized Light theme into the editor
 
@@ -92,17 +92,18 @@ const useLoadingState = () => {
 // Arguments for the CodeEditor
 // #1: onChange: Is a function that takes a newCode argument. This denotes the handler that CHANGES the code content of the template
 // #2: value: Denotes the CURRENT code content template
+// #3: codeLanguage: Denotes the language of the current code content
 // CodeEditor component with correctly typed props
-const CodeEditor: React.FC<{onChange: (newCode: string) => void; codeInput: string;}> = ({ onChange, codeInput }) => (
+const CodeEditor = ({ onChange, codeInput, codeLanguage }: { onChange: (newCode: string) => void, codeInput: string, codeLanguage: string }) => (
   <AceEditor
-    mode="python"
+    mode={codeLanguage}  // Set the mode dynamically based on the codeLanguage prop
     theme="solarized_light"
     name="code-editor"
     editorProps={{ $blockScrolling: true }}
     width="100%"
     height="400px"
-    onChange={onChange} // Pass the onChange handler function
-    value={codeInput}  // Bind the value to the codeInput prop
+    onChange={onChange}
+    value={codeInput}
   />
 );
 
@@ -222,7 +223,16 @@ const ExecuteCodePage: React.FC = () => {
 
   // TODO: Eventually, these would be populated by the template attributes
   const codeLanguageFromTemplate = "python"; // FIXME: Placeholder. corresponds to the <code> attribute of the template
-  
+
+  // Need to adjust the code language passed into the AceEditor (not exactly a 1 to 1 match with the languages listed in executeCode.js)
+  let codeLanguageForStyling = codeLanguageFromTemplate;
+  if (codeLanguageForStyling === "c" || codeLanguageForStyling === "c++"){
+    codeLanguageForStyling = "c_cpp"
+  }
+  else if (codeLanguageForStyling === "go"){
+    codeLanguageForStyling = "golang"
+  }
+
   // Defining the code content state variable + function to manage state
   const codeContentFromTemplate = "print('Hello World')";
   const [codeContent, handleCodeContentChange] = useCodeState(codeContentFromTemplate);
@@ -253,6 +263,7 @@ const ExecuteCodePage: React.FC = () => {
                 <CodeEditor
                   onChange={handleCodeContentChange}
                   codeInput={codeContent}
+                  codeLanguage = {codeLanguageForStyling}
                 />
               </div>
   
