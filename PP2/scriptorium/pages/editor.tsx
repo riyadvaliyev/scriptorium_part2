@@ -24,7 +24,9 @@ import "ace-builds/src-noconflict/mode-ruby";  // For Ruby
 import "ace-builds/src-noconflict/mode-csharp";  // For C#
 import "ace-builds/src-noconflict/mode-golang"; // For Go
 // Loading the styling for the text boxes
-import "ace-builds/src-noconflict/theme-solarized_light"; // Loading the Solarized Light theme into the editor
+// NOTE: The old editor themes (light and dark mode) were: solarized_light and solarized_dark respectively
+import "ace-builds/src-noconflict/theme-monokai"; // Loading the Solarized Light theme into the editor
+import "ace-builds/src-noconflict/theme-chrome";
 
 // Custom hook to manage the code content state
 // Arguments for the useCodeState
@@ -97,7 +99,7 @@ const useLoadingState = () => {
 const CodeEditor = ({ onChange, codeInput, codeLanguage }: { onChange: (newCode: string) => void, codeInput: string, codeLanguage: string }) => (
   <AceEditor
     mode={codeLanguage}  // Set the mode dynamically based on the codeLanguage prop
-    theme="solarized_light"
+    theme="chrome"
     name="code-editor"
     editorProps={{ $blockScrolling: true }}
     width="100%"
