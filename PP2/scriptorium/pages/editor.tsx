@@ -41,10 +41,9 @@ const useStdinState = () => {
   return [stdinContent, handleStdinContentChange] as const;
 };
 
-//TODO: Is there a better way of doing this
 // Custom hook to manage the stdOut content
 // No argument here since the default value is just an empty string ("")
-// NOTE: This is a READY ONLY VALUE
+// NOTE: This is a READ ONLY VALUE
 const useStdOutState = () => {
   const [stdoutContent, setStdoutContent] = useState("");
 
@@ -55,10 +54,9 @@ const useStdOutState = () => {
   return [stdoutContent, handleStoutContentChange] as const;
 };
 
-//TODO: Is there a better way of doing this
 // Custom hook to manage the stderr content
 // No argument here since the default value is just an empty string ("")
-// NOTE: This is a READY ONLY VALUE
+// NOTE: This is a READ ONLY VALUE
 const useStderrState = () => {
   const [stderrContent, setStderrContent] = useState("");
 
@@ -66,6 +64,17 @@ const useStderrState = () => {
     setStderrContent(newStderrContent);
   }
   return [stderrContent, handleStderrContentChange] as const;
+};
+
+// Custom hook to manage the loading state of the "Run Code" button
+const useLoadingState = () => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  function setLoadingState(isLoading: boolean) {
+    setIsLoading(isLoading);
+  }
+
+  return [isLoading, setLoadingState] as const;
 };
 
 //CodeEditor instance: A glorified text box where raw code can be inputted (can either be typed out by user or imported via code template)
@@ -122,8 +131,16 @@ const OutputEditor: React.FC<{ stdoutContent: string; stderrContent: string }> =
 
 // RunCodeButton component to handle the alert functionality
 // Note: Since codeContent is a prop variable, need to wrap it in a React.FC definition
-const RunCodeButton = ({ onClick }: { onClick: () => void })  => {
-  return <button onClick={onClick}>Run Code</button>;
+const RunCodeButton = ({ onClick, isLoading}: { onClick: () => void, isLoading: boolean})  => {
+  return (
+    <button onClick={onClick} disabled={isLoading}>
+      {isLoading ? (
+        <div className="w-6 h-6 border-4 border-t-4 border-gray-300 border-solid rounded-full animate-spin"></div>
+      ) : (
+        "Run Code"
+      )}
+    </button>
+  );
 };
 
 // Handler to send the code input to the backend API endpoint. reference file: api/executeCode.js
@@ -132,16 +149,18 @@ const RunCodeButton = ({ onClick }: { onClick: () => void })  => {
 // Argument codeStdin: The standard input of the code being ra
 const handleRunCodeClick = async (codeContent: string, codeLanguage: string, codeStdin: string,
   setStdoutContent: any, //FIXME: Used any to suppress the warnings
-  setStderrContent: any  //FIXME: Used any to suppress the warnings
+  setStderrContent: any,  //FIXME: Used any to suppress the warnings
+  setIsLoading: any
 ) => {
   const endpointJsonStr = JSON.stringify({
     inputCode: codeContent, 
     language: codeLanguage,
     stdin: codeStdin
   })
-  // Clear stdoutContent and stderrContent before new execution
-  setStdoutContent("");
-  setStderrContent("");
+  // Define all values of state variables initially
+  setStdoutContent(""); // Resetting standard output content each time button is pressed
+  setStderrContent(""); // Resetting standard error content each time button is pressed
+  setIsLoading(true); // Set the button to loading when the code execution request is initially processed
   try {
     // Construct the method and header for the intended response
     const response = await fetch("/api/executeCode", {
@@ -158,6 +177,9 @@ const handleRunCodeClick = async (codeContent: string, codeLanguage: string, cod
     setStdoutContent(data.output || "No output returned");
     setStderrContent(data.error || "No errors");
 
+    // Finally, since the code execution is done, set the "Run Code" button back to false state
+    setIsLoading(false);
+
     // FIXME: Temporary alert to test output
     // alert(
     //   `Output (Standard output): ${data.output || "No output returned"}\n` +
@@ -165,6 +187,7 @@ const handleRunCodeClick = async (codeContent: string, codeLanguage: string, cod
     // );
   } catch (error) {
     console.log("Error executing code. Please try again.");
+    setIsLoading(false);
   }
 };
 
@@ -185,6 +208,8 @@ const ExecuteCodePage: React.FC = () => {
   const [stdoutContent, setStdoutContent] = useStdOutState();
   const [stderrContent, setStderrContent] = useStderrState();
 
+  // Defining the "Run button" loading state variable + function to manage state
+  const [isLoading, setIsLoading] = useLoadingState();
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -229,9 +254,11 @@ const ExecuteCodePage: React.FC = () => {
                   codeLanguageFromTemplate,
                   stdinContent,
                   setStdoutContent,
-                  setStderrContent
+                  setStderrContent,
+                  setIsLoading
                 )
               }
+              isLoading={isLoading}
             />
           </div>
   
