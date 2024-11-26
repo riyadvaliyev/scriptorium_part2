@@ -33,9 +33,14 @@ export default async function handler(req, res) {
 
     if (!user) {
         return res.status(401).json({ error: "User not found" });
-    } else if (loweredLanguage !== "javascript" && loweredLanguage !== "python" 
-        && loweredLanguage !== "java" && loweredLanguage !== "c++" && loweredLanguage !== "c") {
-        return res.status(400).json({ error: "Invalid language" });
+    } 
+    // else if (loweredLanguage !== "javascript" && loweredLanguage !== "python" 
+    //     && loweredLanguage !== "java" && loweredLanguage !== "c++" && loweredLanguage !== "c") {
+    //     return res.status(400).json({ error: "Invalid language" });
+    // }
+
+    if (!language || !["javascript", "python", "java", "c++", "c", "ruby", "go", "rust", "r", "c#"].includes(language.toLowerCase())) {
+      return res.status(400).json({ error: "Valid language is required." });
     }
 
     try {

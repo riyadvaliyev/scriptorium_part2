@@ -22,7 +22,7 @@ export default async function handler(req, res) {
             return res.status(401).json({ error: "Unauthorized" });
         } else if (!templateId) {
             return res.status(400).json({ error: "Template ID is required." });
-        } else if (!language || !["javascript", "python", "java", "c++", "c"].includes(language.toLowerCase())) {
+        } else if (!language || !["javascript", "python", "java", "c++", "c", "rust", "go", "r", "c#", "ruby"].includes(language.toLowerCase())) {
             return res.status(400).json({ error: "Valid language is required." });
         }
 
