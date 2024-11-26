@@ -135,7 +135,7 @@ const RunCodeButton = ({ onClick, isLoading}: { onClick: () => void, isLoading: 
   return (
     <button onClick={onClick} disabled={isLoading}>
       {isLoading ? (
-        <div className="w-6 h-6 border-4 border-t-4 border-gray-300 border-solid rounded-full animate-spin"></div>
+        "Running..."
       ) : (
         "Run Code"
       )}
