@@ -105,7 +105,15 @@ function regexCleaningInput(language, inputString){
         return cleanedInputString;
     }
 
-    else if (language === "java" || language === "c" || language === "c++"){
+    else if (language === "java"){
+        let cleanedInputString = inputString
+        ?.replace(/'/g, "\\'") // Escape single quotes
+        ?.replace(/"/g, '\\"') // Escape double quotes
+        ?.trim(); // Trim any leading or trailing whitespace
+        return cleanedInputString;
+    }
+
+    else if (language === "c" || language === "c++"){
         let cleanedInputString = inputString
         ?.replace(/'/g, "\\'") // Escape single quotes
         ?.trim(); // Trim any leading or trailing whitespace
