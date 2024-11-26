@@ -96,7 +96,7 @@ const StdinEditor: React.FC<{onChange: (newStdin: string) => void;}> = ({ onChan
     name="stdin-editor"
     editorProps={{ $blockScrolling: true }}
     width="100%"
-    height="200px" // A smaller height for stdin input
+    height="300px" // A smaller height for stdin input
     onChange={onChange} // Pass the onChange handler function
   />
 );
@@ -112,7 +112,7 @@ const OutputEditor: React.FC<{ stdoutContent: string; stderrContent: string }> =
       name="output-editor"
       editorProps={{ $blockScrolling: true }}
       width="100%"
-      height="200px"
+      height="760px"
       value={combinedOutput}
       readOnly={true}
     />
@@ -139,6 +139,9 @@ const handleRunCodeClick = async (codeContent: string, codeLanguage: string, cod
     language: codeLanguage,
     stdin: codeStdin
   })
+  // Clear stdoutContent and stderrContent before new execution
+  setStdoutContent("");
+  setStderrContent("");
   try {
     // Construct the method and header for the intended response
     const response = await fetch("/api/executeCode", {
@@ -246,36 +249,49 @@ const ExecuteCodePage: React.FC = () => {
 
 // /*
 // Old return method: 
-
-//   // return (
-//   //   <div>
-//   //     <h1>Code execution page</h1>
-//   //     <br />
-//   //     <br />
-//   //     {/* Code editor component, passing the change handler *///}
-//   //     <h3>Code input box: </h3>
-//   //     <CodeEditor onChange={handleCodeContentChange} codeInput={codeContent}/>
-//   //     <br />
-//   //     {/* Stdin editor component, passing the change handler */}
-//   //     <h3>Standard Input box: </h3>
-//   //     <StdinEditor onChange={handleStdinContentChange}/>
-//   //     <br />
-//   //     <OutputEditor stdoutContent={stdoutContent} stderrContent={stderrContent} />
-//   //     <br />
-//   //     <br />
-//   //     <br/>
-//   //     {/* Button to trigger displaying the code, button logic stays in ExecuteCodePage */}
-//   //     <RunCodeButton onClick={() => handleRunCodeClick(codeContent, codeLanguageFromTemplate, stdinContent, setStdoutContent, setStderrContent)} />
-//   //     <br />
-//   //     <h3>TEMPORARY TAGS: Printing out the raw output for both code content and stdin content:</h3>
-//   //     {/* Display the code below */}
-//   //     <p>{codeContent}</p>
-//   //     <p>{stdinContent}</p>
-//   //     <br />
-
-//   //   </div>
-//   // );
-
-// */
+// return (
+//   <div>
+//     <h1>Code execution page</h1>
+//     <br />
+//     <br />
+    
+//     {/* Code editor component, passing the change handler */}
+//     <h3>Code input box: </h3>
+//     <CodeEditor onChange={handleCodeContentChange} codeInput={codeContent} />
+//     <br />
+    
+//     {/* Stdin editor component, passing the change handler */}
+//     <h3>Standard Input box: </h3>
+//     <StdinEditor onChange={handleStdinContentChange} />
+//     <br />
+    
+//     <OutputEditor stdoutContent={stdoutContent} stderrContent={stderrContent} />
+//     <br />
+//     <br />
+//     <br />
+    
+//     {/* Button to trigger displaying the code, button logic stays in ExecuteCodePage */}
+//     <RunCodeButton
+//       onClick={() =>
+//         handleRunCodeClick(
+//           codeContent,
+//           codeLanguageFromTemplate,
+//           stdinContent,
+//           setStdoutContent,
+//           setStderrContent
+//         )
+//       }
+//     />
+//     <br />
+    
+//     <h3>TEMPORARY TAGS: Printing out the raw output for both code content and stdin content:</h3>
+    
+//     {/* Display the code below */}
+//     <p>{codeContent}</p>
+//     <p>{stdinContent}</p>
+//     <br />
+//   </div>
+// );
+// }
 
 export default ExecuteCodePage;
