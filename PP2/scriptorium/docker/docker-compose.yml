@@ -4,7 +4,7 @@ services:
   python_service:
     build:
       context: .  # Set the context to the current folder (docker)
-      dockerfile: DockerFile.python  # Path to the Dockerfile in the current folder
+      dockerfile: DockerFilePython  # Path to the Dockerfile in the current folder
     container_name: python_container
     image: python_image
     networks:
@@ -18,7 +18,7 @@ services:
   javascript_service:
     build:
       context: .  # Set the context to the current folder (docker)
-      dockerfile: DockerFile.javascript  # Path to the Dockerfile in the current folder
+      dockerfile: DockerFileJavascript  # Path to the Dockerfile in the current folder
     container_name: javascript_container
     image: javascript_image
     networks:
@@ -32,7 +32,7 @@ services:
   java_service:
     build:
       context: .  # Set the context to the current folder (docker)
-      dockerfile: DockerFile.java  # Path to the Dockerfile in the current folder
+      dockerfile: DockerFileJava  # Path to the Dockerfile in the current folder
     container_name: java_container
     image: java_image
     networks:
@@ -46,7 +46,7 @@ services:
   c_service:
     build:
       context: .  # Set the context to the current folder (docker)
-      dockerfile: DockerFile.c  # Path to the Dockerfile for C
+      dockerfile: DockerFileC  # Path to the Dockerfile for C
     container_name: c_container
     image: c_image
     networks:
@@ -60,7 +60,7 @@ services:
   cpp_service:
     build:
       context: .  # Set the context to the current folder (docker)
-      dockerfile: DockerFile.cpp  # Path to the Dockerfile for C++
+      dockerfile: DockerFileCpp  # Path to the Dockerfile for C++
     container_name: cpp_container
     image: cpp_image
     networks:
@@ -74,7 +74,7 @@ services:
   ruby_service:
     build:
       context: .  # Set the context to the current folder (docker)
-      dockerfile: DockerFile.ruby  # Path to the Dockerfile for Ruby
+      dockerfile: DockerFileRuby  # Path to the Dockerfile for Ruby
     container_name: ruby_container
     image: ruby_image
     networks:
