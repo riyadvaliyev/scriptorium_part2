@@ -60,8 +60,14 @@ export default async function handler(req, res) {
             where: filter_settings,
             skip: skip,
             take: intPageSize,
-            orderBy: { id: 'desc'}
+            orderBy: { id: 'desc'},
+            include: {
+                user: true, // This ensures the `user` relation is loaded
+                tags: true, // Include tags if needed
+            },
         });
+
+        console.log("got there");
 
         const count = await prisma.codeTemplate.count();
         const totalPages = Math.ceil(count / intPageSize);
