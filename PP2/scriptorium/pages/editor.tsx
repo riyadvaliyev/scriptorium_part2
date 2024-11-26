@@ -279,13 +279,6 @@ const ExecuteCodePage: React.FC = () => {
               isLoading={isLoading}
             />
           </div>
-  
-          {/* Temporary debugging output */}
-          <div>
-            <h3 className="text-lg font-medium">Temporary Debug Output</h3>
-            <p className="text-sm text-gray-700">{codeContent}</p>
-            <p className="text-sm text-gray-700">{stdinContent}</p>
-          </div>
         </div>
       </div>
     </div>
