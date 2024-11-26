@@ -283,30 +283,36 @@ const CommentSection: React.FC<CommentsSectionProps> = ({
       const response = await fetch(`/api/comment/listByRating?postId=${postId}`);
       if (!response.ok) throw new Error("Failed to fetch comments");
       const data = await response.json();
-
-      // Process comments to nest replies under their respective parent
-      const commentsMap = new Map<number, Comment>();
-      const topLevelComments: Comment[] = [];
-
-      (data.data || []).forEach((comment: Comment) => {
-        comment.replies = []; // Initialize replies array
-        commentsMap.set(comment.id, comment);
-
-        if (comment.parentId) {
-          // Add comment to its parent's replies
-          const parent = commentsMap.get(comment.parentId);
-          if (parent) parent.replies.push(comment);
-        } else {
-          // Top-level comment
-          topLevelComments.push(comment);
-        }
-      });
-
-      setComments(topLevelComments);
+  
+      const buildNestedReplies = (comments: Comment[]): Comment[] => {
+        const commentsMap = new Map<number, Comment>();
+        const topLevelComments: Comment[] = [];
+  
+        // Initialize comments in the map
+        comments.forEach((comment) => {
+          comment.replies = []; // Initialize replies array
+          commentsMap.set(comment.id, comment);
+        });
+  
+        // Populate replies and identify top-level comments
+        comments.forEach((comment) => {
+          if (comment.parentId) {
+            const parent = commentsMap.get(comment.parentId);
+            if (parent) parent.replies.push(comment);
+          } else {
+            topLevelComments.push(comment);
+          }
+        });
+  
+        return topLevelComments;
+      };
+  
+      const nestedComments = buildNestedReplies(data.data || []);
+      setComments(nestedComments);
     } catch (error) {
       console.error("Error fetching comments:", error);
     }
-  };
+  };  
 
   const handleCommentVote = async (commentId: number, ratingValue: number) => {
     try {
@@ -318,31 +324,33 @@ const CommentSection: React.FC<CommentsSectionProps> = ({
         },
         body: JSON.stringify({ commentId, ratingValue }),
       });
-
+  
       if (!response.ok) throw new Error("Failed to vote on comment");
-
+  
       const updatedComment = await response.json();
-      console.log("Updated Comments:", updatedComment);
-
+  
+      // Recursive function to update nested replies
+      const updateNestedReplies = (replies: Comment[]): Comment[] => {
+        return replies.map((reply) =>
+          reply.id === updatedComment.id
+            ? { ...reply, upvotes: updatedComment.upvotes, downvotes: updatedComment.downvotes }
+            : { ...reply, replies: updateNestedReplies(reply.replies) }
+        );
+      };
+  
       // Update the specific comment/reply in the state
       setComments((prevComments) =>
         prevComments.map((comment) =>
           comment.id === updatedComment.id
             ? { ...comment, upvotes: updatedComment.upvotes, downvotes: updatedComment.downvotes }
-            : {
-                ...comment,
-                replies: comment.replies.map((reply) =>
-                  reply.id === updatedComment.id
-                    ? { ...reply, upvotes: updatedComment.upvotes, downvotes: updatedComment.downvotes }
-                    : reply
-                ),
-              }
+            : { ...comment, replies: updateNestedReplies(comment.replies) }
         )
       );
     } catch (error) {
       console.error("Error voting on comment:", error);
     }
   };
+  
 
   const addCommentOrReply = async (text: string, parentId?: number) => {
     try {
@@ -371,7 +379,6 @@ const CommentSection: React.FC<CommentsSectionProps> = ({
     <div className="mt-4 ml-8">
       {replies.map((reply, index) => {
         const replyLabel = `${parentLabel}.${index + 1}`;
-
         return (
           <div key={reply.id} className="p-2 border-b last:border-none">
             <p className="font-bold text-sm text-gray-700">
@@ -384,7 +391,7 @@ const CommentSection: React.FC<CommentsSectionProps> = ({
               {new Date(reply.createdAt).toLocaleDateString()}
             </p>
             <p className="mt-2">{reply.text}</p>
-
+  
             <div className="flex items-center mt-2">
               <button
                 className="text-green-600 font-bold mr-2"
@@ -399,7 +406,7 @@ const CommentSection: React.FC<CommentsSectionProps> = ({
                 - {reply.downvotes || 0}
               </button>
             </div>
-
+  
             {isAuthenticated && (
               <CommentForm
                 onSubmit={addCommentOrReply}
@@ -407,13 +414,14 @@ const CommentSection: React.FC<CommentsSectionProps> = ({
                 placeholder={`Write your reply to Reply ${replyLabel}...`}
               />
             )}
-
+  
+            {/* Recursively render replies */}
             {reply.replies.length > 0 && renderReplies(reply.replies, replyLabel)}
           </div>
         );
       })}
     </div>
-  );
+  );  
 
   const renderComments = () => (
     <>
