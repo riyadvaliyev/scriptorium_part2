@@ -36,7 +36,6 @@ const Blog: React.FC = () => {
         const response = await fetch(`/api/blog/getPosts`);
         if (!response.ok) throw new Error('Failed to fetch posts');
         const data = await response.json();
-        console.log('Fetched Posts:', data.posts);
         setPosts(data.posts as BlogPost[]);
         setFilteredPosts(data.posts as BlogPost[]);
       } catch (error) {
