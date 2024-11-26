@@ -114,7 +114,7 @@ const CodeEditor = ({ onChange, codeInput, codeLanguage }: { onChange: (newCode:
 const StdinEditor: React.FC<{onChange: (newStdin: string) => void;}> = ({ onChange}) => (
   <AceEditor
     mode="text" // Since stdin is plain text, we use the 'text' mode
-    theme="solarized_light" // Same theme as CodeEditor
+    theme="chrome" // Same theme as CodeEditor
     name="stdin-editor"
     editorProps={{ $blockScrolling: true }}
     width="100%"
@@ -130,7 +130,7 @@ const OutputEditor: React.FC<{ stdoutContent: string; stderrContent: string }> =
   return (
     <AceEditor
       mode="text"
-      theme="solarized_light"
+      theme="chrome"
       name="output-editor"
       editorProps={{ $blockScrolling: true }}
       width="100%"
@@ -256,6 +256,11 @@ const ExecuteCodePage: React.FC = () => {
         <h1 className="text-3xl font-bold mb-6">Code Execution Page</h1>
   
         <div className="bg-white p-6 rounded shadow space-y-6">
+        {/* Warning messages for Memory and Code Execution Time Limits */}
+        <div className="bg-blue-600 p-4 rounded mb-6 text-white">
+          <p className="text-lg font-medium">Memory Limit: 512 MB</p>
+          <p className="text-lg font-medium">Code Execution Time Limit: 20 seconds</p>
+        </div>
           {/* Main content layout */}
           <div className="flex flex-col lg:flex-row lg:space-x-6">
             {/* Left-side: Code input and Stdin */}
