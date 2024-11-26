@@ -164,7 +164,7 @@ const handleRunCodeClick = async (codeContent: string, codeLanguage: string, cod
     //   `Warnings and/or Errors (Standard error): ${data.error || "No errors"}`
     // );
   } catch (error) {
-    alert("Error executing code. Please try again.");
+    console.log("Error executing code. Please try again.");
   }
 };
 
