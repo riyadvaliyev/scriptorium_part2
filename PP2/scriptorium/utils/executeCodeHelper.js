@@ -155,8 +155,8 @@ export async function cleanUpTempCodeFiles(inputCode, language){
         
         try {
             // Remove both the .java and .class files inside the container
-            await execAsync(`docker exec -i java_container rm /tmp/${tempJavaFileName}.java`);
-            await execAsync(`docker exec -i java_container rm /tmp/${tempJavaFileName}.class`);
+            await execAsync(`docker exec -u root -i java_container rm /tmp/${tempJavaFileName}.java`);
+            await execAsync(`docker exec -u root -i java_container rm /tmp/${tempJavaFileName}.class`);
         } catch (error) {
             console.error("Error deleting the temporary Java file and class:", error);
         }
@@ -166,21 +166,24 @@ export async function cleanUpTempCodeFiles(inputCode, language){
         
         try {
             // Remove both the .c source file and the compiled executable inside the container
-            await execAsync(`docker exec -i c_container rm /tmp/${tempCFileName}.c`);
-            await execAsync(`docker exec -i c_container rm /tmp/${tempCFileName}`);
+            await execAsync(`docker exec -u root -i c_container rm /tmp/${tempCFileName}.c`);
+            await execAsync(`docker exec -u root -i c_container rm /tmp/${tempCFileName}`);
         } catch (error) {
             console.error("Error deleting the temporary C file and executable:", error);
         }
     }
-    else if (language === "c++"){
-        const tempCFileName = "tempCppFile"
+    else if (language === "c++") {
+        const tempCppFileName = "tempCppFile";  // Temporary file name for C++ code
+    
         try {
-            await execAsync(`rm ${tempCFileName}.cpp`);
-            await execAsync(`rm ${tempCFileName}`);
+            // Remove both the .cpp source file and the compiled executable inside the container
+            await execAsync(`docker exec -u root -i cpp_container rm -f /tmp/${tempCppFileName}.cpp`);
+            await execAsync(`docker exec -u root -i cpp_container rm -f /tmp/${tempCppFileName}`);
         } catch (error) {
             console.error("Error deleting the temporary C++ file and executable:", error);
-        }   
+        }
     }
+    
     else if (language === "rust"){
         const tempCFileName = "tempRustFile"
         try {
@@ -205,18 +208,21 @@ async function dockerCompileCode(inputCode, language, stdin) {
 
     // Determine the image name based on the language
     // TODO: Probably don't need to check for invalid language (already done in executeCode.js)
-    let imageName;
+    let containerName;
     if (language === "python") {
-        imageName = "python_image"; 
+        containerName = "python_container"; 
     } 
     else if (language === "javascript") {
-        imageName = "javascript_image"; 
+        containerName = "javascript_container"; 
     }
     else if (language === "java"){
-        imageName = "java_image";
+        containerName = "java_container";
     }
     else if (language === "c"){
-        imageName = "c_image";
+        containerName = "c_container";
+    }
+    else if (language === "c++"){
+        containerName = "cpp_container";
     }
     
     // Determine the docker execution command to run
@@ -224,14 +230,14 @@ async function dockerCompileCode(inputCode, language, stdin) {
         // the -c command tells python to execute inputCode as a string not a file
         // Futhermore, need to put "" around the template literal (${}) to make it interpret as a string
         // codeCommand = `echo "${cleanedStdin}" | docker exec -i python_container python3 -c "${cleanedInputCode}"`;
-        codeCommand = `docker exec -i python_container bash -c "echo '${cleanedStdin}' | timeout --signal=SIGKILL 20s python3 -c '${cleanedInputCode}'"`;
+        codeCommand = `docker exec -i '${containerName}' bash -c "echo '${cleanedStdin}' | timeout --signal=SIGKILL 20s python3 -c '${cleanedInputCode}'"`;
     }
     else if (language === "javascript"){
         // We use node.js to run javascript commands
         // The "-e" flag, like how -c is used for python, tells node.js to execute the command 
         // codeCommand = `echo "${cleanedStdin}" | docker run --rm -i ${imageName} node -e "${cleanedInputCode}"`; 
         // codeCommand = `echo "${cleanedStdin}" | docker exec -i javascript_container node -e "${cleanedInputCode}"`;
-        codeCommand = `docker exec -i javascript_container bash -c "echo '${cleanedStdin}' | timeout --signal=SIGKILL 20s node -e '${cleanedInputCode}'"`;
+        codeCommand = `docker exec -i '${containerName}' bash -c "echo '${cleanedStdin}' | timeout --signal=SIGKILL 20s node -e '${cleanedInputCode}'"`;
     }
 
     else if (language === "java"){
@@ -240,16 +246,16 @@ async function dockerCompileCode(inputCode, language, stdin) {
         let tempJavaFileName = findingJavaClassName[1];
 
         // Write the Java code to a temporary file inside the container
-        await execAsync(`docker exec -i java_container bash -c 'echo "${cleanedInputCode}" > /tmp/${tempJavaFileName}.java'`);
+        await execAsync(`docker exec -i '${containerName}' bash -c 'echo "${cleanedInputCode}" > /tmp/${tempJavaFileName}.java'`);
 
         // Compile the Java code inside the container
         // We use -Xlint:unchecked to show warnings (if any)
-        const { stderr } = await execAsync(`docker exec -i java_container javac -Xlint:unchecked /tmp/${tempJavaFileName}.java`);
+        const { stderr } = await execAsync(`docker exec -i '${containerName}' javac -Xlint:unchecked /tmp/${tempJavaFileName}.java`);
         warnings = stderr; // Store any compilation warnings
 
         // Run the Java code (passing stdin via echo)
         // codeCommand = `echo "${cleanedStdin}" | docker exec -i java_container java -cp /tmp ${tempJavaFileName}`;
-        codeCommand = `docker exec -i java_container bash -c "echo '${cleanedStdin}' | timeout --signal=SIGKILL 1m java -cp /tmp ${tempJavaFileName}"`;
+        codeCommand = `docker exec -i '${containerName}' bash -c "echo '${cleanedStdin}' | timeout --signal=SIGKILL 20s java -cp /tmp ${tempJavaFileName}"`;
 
     }
     else if (language === "c") {
@@ -260,15 +266,33 @@ async function dockerCompileCode(inputCode, language, stdin) {
         fs.writeFileSync(tempCFilePath, cleanedInputCode);
     
         // Copy the file to the Docker container
-        await execAsync(`docker cp ${tempCFilePath} c_container:/tmp/${tempCFileName}.c`);
+        await execAsync(`docker cp ${tempCFilePath} '${containerName}':/tmp/${tempCFileName}.c`);
     
         // Compile the C code inside the container
-        const { stderr } = await execAsync(`docker exec -i c_container gcc -Wall -Wextra /tmp/${tempCFileName}.c -o /tmp/${tempCFileName}`);
+        const { stderr } = await execAsync(`docker exec -i '${containerName}' gcc -Wall -Wextra /tmp/${tempCFileName}.c -o /tmp/${tempCFileName}`);
         warnings = stderr; // Compilation warnings
 
-        codeCommand = `echo '${cleanedStdin}' | docker exec -i c_container sh -c '/tmp/${tempCFileName}'`;
+        codeCommand = `echo '${cleanedStdin}' | docker exec -i '${containerName}' timeout --signal=SIGKILL 20s sh -c '/tmp/${tempCFileName}'`;
 
     }
+    else if (language === "c++") {
+        const tempCppFileName = "tempCppFile";
+        const tempCppFilePath = `/tmp/${tempCppFileName}.cpp`;
+    
+        // Write the C++ code to a local temporary file
+        fs.writeFileSync(tempCppFilePath, cleanedInputCode);
+    
+        // Copy the file to the Docker container
+        await execAsync(`docker cp ${tempCppFilePath} '${containerName}':/tmp/${tempCppFileName}.cpp`);
+    
+        // Compile the C++ code inside the container
+        const { stderr } = await execAsync(`docker exec -i '${containerName}' g++ -Wall -Wextra /tmp/${tempCppFileName}.cpp -o /tmp/${tempCppFileName}`);
+        warnings = stderr;
+    
+        // Run the compiled C++ code with a timeout of 20 seconds
+        codeCommand = `echo '${cleanedStdin}' | docker exec -i '${containerName}' timeout --signal=SIGKILL 20s sh -c '/tmp/${tempCppFileName}'`;
+    }
+    
     return { codeCommand, warnings }
 
 }

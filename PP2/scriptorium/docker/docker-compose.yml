@@ -56,6 +56,20 @@ services:
       resources:
         limits:
           memory: 512m  # Set memory limit to 512 MB
+  
+  cpp_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.cpp  # Path to the Dockerfile for C
+    container_name: cpp_container
+    image: cpp_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          memory: 512m  # Set memory limit to 512 MB
 
 networks:
   scriptorium_network:
