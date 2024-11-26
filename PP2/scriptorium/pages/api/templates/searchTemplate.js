@@ -19,13 +19,15 @@ export default async function handler(req, res) {
     }
 
     // ChatGPT helped with some of the pagination code (mostly the pagination bits, I did the rest)
-    const { title, tempTags, content, page, pageSize} = req.query;
+    const { title, tags, content, page, pageSize} = req.query;
     const intPage = parseInt(page) || 1;
     const intPageSize = parseInt(pageSize) || 10;
     const skip = (intPage - 1) * intPageSize;
 
-    if (tempTags && !Array.isArray(tempTags)) {
-        var tags = [tempTags];
+    if (tags && !Array.isArray(tags)) {
+        var tags_arr = [tags];
+    } else if (tags) {
+        var tags_arr = tags
     }
 
     try {
@@ -39,9 +41,9 @@ export default async function handler(req, res) {
 
         if (tags) {
             filter_settings.tags = {
-                every: {
+                some: {
                     name: {
-                        in: tags,
+                        in: tags_arr,
                     }
                 }
             }
