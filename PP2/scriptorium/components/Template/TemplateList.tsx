@@ -88,7 +88,7 @@ const TemplateList: React.FC<TemplateListProps> = ({ templates = [] }) => {
               className="text-blue-500 hover:underline mb-2"
               onClick={() => toggleCodeVisibility(template.id)}
             >
-              {visibleCodes[template.id] ? 'Show Less' : 'Show More'}
+              {visibleCodes[template.id] ? 'Hide Code' : 'Show Code'}
             </button>
             {/* reveals the code with overflow */}
             <div
