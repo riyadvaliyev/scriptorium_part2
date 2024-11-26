@@ -4,7 +4,7 @@ services:
   python_service:
     build:
       context: .  # Set the context to the current folder (docker)
-      dockerfile: DockerFilePython  # Path to the Dockerfile in the current folder
+      dockerfile: DockerFile.Python  # Path to the Dockerfile in the current folder
     container_name: python_container
     image: python_image
     networks:
@@ -18,7 +18,7 @@ services:
   javascript_service:
     build:
       context: .  # Set the context to the current folder (docker)
-      dockerfile: DockerFileJavascript  # Path to the Dockerfile in the current folder
+      dockerfile: DockerFile.Javascript  # Path to the Dockerfile in the current folder
     container_name: javascript_container
     image: javascript_image
     networks:
@@ -32,7 +32,7 @@ services:
   java_service:
     build:
       context: .  # Set the context to the current folder (docker)
-      dockerfile: DockerFileJava  # Path to the Dockerfile in the current folder
+      dockerfile: DockerFile.Java  # Path to the Dockerfile in the current folder
     container_name: java_container
     image: java_image
     networks:
@@ -46,7 +46,7 @@ services:
   c_service:
     build:
       context: .  # Set the context to the current folder (docker)
-      dockerfile: DockerFileC  # Path to the Dockerfile for C
+      dockerfile: DockerFile.C  # Path to the Dockerfile for C
     container_name: c_container
     image: c_image
     networks:
@@ -60,7 +60,7 @@ services:
   cpp_service:
     build:
       context: .  # Set the context to the current folder (docker)
-      dockerfile: DockerFileCpp  # Path to the Dockerfile for C++
+      dockerfile: DockerFile.Cpp  # Path to the Dockerfile for C++
     container_name: cpp_container
     image: cpp_image
     networks:
@@ -74,7 +74,7 @@ services:
   ruby_service:
     build:
       context: .  # Set the context to the current folder (docker)
-      dockerfile: DockerFileRuby  # Path to the Dockerfile for Ruby
+      dockerfile: DockerFile.Ruby  # Path to the Dockerfile for Ruby
     container_name: ruby_container
     image: ruby_image
     networks:
@@ -84,6 +84,21 @@ services:
       resources:
         limits:
           memory: 512m  # Set memory limit to 512 MB
+
+  swift_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.Swift  # Path to the Dockerfile for Swift
+    container_name: swift_container
+    image: swift_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          memory: 512m  # Set memory limit to 512 MB
+
 
 networks:
   scriptorium_network:
