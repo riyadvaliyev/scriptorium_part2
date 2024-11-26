@@ -24,4 +24,4 @@ node createAdmin.js
 
 # Start up Docker containers
 # Note: Even thought the docker containers are in the docker folder, we're still running them in the current directory
-docker-compose -f docker/docker-compose.yml up --build -d  # -d means to run the containers in detatched mode (frees the terminal to do other things)
+docker-compose -f docker/docker-compose.yml -p scriptorium_docker_containers up --build -d # -d means to run the containers in detatched mode (frees the terminal to do other things)
