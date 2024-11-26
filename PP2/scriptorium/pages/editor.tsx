@@ -13,7 +13,17 @@
 import React, { useRef, useState } from "react";
 import Navbar from '../components/Shared/Navbar';
 import AceEditor from 'react-ace'; // Loading the AceEditor import
-import "ace-builds/src-noconflict/mode-python"; // Loading the Python language mode into the editor
+// Loading the syntax highlighting for all the different languages
+import "ace-builds/src-noconflict/mode-python";  // For Python
+import "ace-builds/src-noconflict/mode-javascript";  // For JavaScript
+import "ace-builds/src-noconflict/mode-java";  // For Java
+import "ace-builds/src-noconflict/mode-c_cpp";  // For C and C++
+import "ace-builds/src-noconflict/mode-rust";  // For Rust
+import "ace-builds/src-noconflict/mode-r";  // For R
+import "ace-builds/src-noconflict/mode-ruby";  // For Ruby
+import "ace-builds/src-noconflict/mode-csharp";  // For C#
+import "ace-builds/src-noconflict/mode-go";  // For Go
+// Loading the styling for the text boxes
 import "ace-builds/src-noconflict/theme-solarized_light"; // Loading the Solarized Light theme into the editor
 
 // Custom hook to manage the code content state
@@ -143,7 +153,7 @@ const RunCodeButton = ({
       // Don't disable so the user can cancel the operation
     >
       {isLoading ? (
-        "Loading..." // Display Loading when isLoading is true
+        "Running Code ... Press again to cancel" // Display Loading when isLoading is true
       ) : (
         "Run Code" // Display Run Code when isLoading is false
       )}
