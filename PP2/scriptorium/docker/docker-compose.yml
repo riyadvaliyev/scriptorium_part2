@@ -13,7 +13,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m  # Set memory limit to 512 MB
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
 
   javascript_service:
     build:
@@ -27,7 +28,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m  # Set memory limit to 512 MB
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
 
   java_service:
     build:
@@ -41,7 +43,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m  # Set memory limit to 512 MB
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
 
   c_service:
     build:
@@ -55,7 +58,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m  # Set memory limit to 512 MB
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
 
   cpp_service:
     build:
@@ -69,7 +73,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m  # Set memory limit to 512 MB
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
 
   ruby_service:
     build:
@@ -83,7 +88,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m  # Set memory limit to 512 MB
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
 
   rust_service:
     build:
@@ -97,7 +103,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m  # Set memory limit to 512 MB
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
 
   go_service:
     build:
@@ -111,7 +118,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m  # Set memory limit to 512 MB
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
   
   r_service:
     build:
@@ -125,7 +133,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m  # Set memory limit to 512 MB
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
   
   lisp_service:
     build:
@@ -139,7 +148,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m  # Set memory limit to 512 MB
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
 
 
 
