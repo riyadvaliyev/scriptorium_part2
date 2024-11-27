@@ -28,13 +28,26 @@ export default async function handler(req, res) {
         const verified_token = verifyToken(req, res);
 
         if (!verified_token) {
-            return res.status(401).json({ error: "Invalid token" });
+            return res.status(401).json({ error: "Invalid token", errorId: 1 });
         }
 
         // language check:
         if (!language || !["javascript", "python", "java", "c++", "c", "ruby", "go", "rust", "r", "c#"].includes(language.toLowerCase())) {
-            return res.status(400).json({ error: "Valid language is required." });
+            return res.status(400).json({ error: "Valid language is required.", errorId: 2 });
+        } else if (!title) {
+            return res.status(400).json({ error: "Title is required.", errorId: 2 });
+        } else if (!explanation) {
+            return res.status(400).json({ error: "Explanation is required.", errorId: 2 });
+        } else if (!code) {
+            return res.status(400).json({ error: "Code is required.", errorId: 2 });
+        } else if (!templateId) {
+            return res.status(400).json({ error: "Template ID is required.", errorId: 2 });
+        } else if (!tags || tags == "" || (Array.isArray(tags) && tags.length === 0)) {
+            console.log("MUST HAVE TAGS");
+            return res.status(400).json({ error: "Tags are required.", errorId: 2 });
         }
+
+        console.log("TAGS: ", tags);
         
         try {
             const user = await prisma.user.findUnique({
@@ -44,7 +57,7 @@ export default async function handler(req, res) {
             });
     
             if (!user) {
-                return res.status(401).json({ error: "User not found" });
+                return res.status(401).json({ error: "User not found", errorId: 3 });
             }
     
             const template = await prisma.codeTemplate.findUnique({
@@ -54,11 +67,17 @@ export default async function handler(req, res) {
             });
     
             if (!template) {
-                return res.status(404).json({ error: "Template not found" });
+                return res.status(404).json({ error: "Template not found", errorId: 4 });
             }
-    
+            
+            if (tags && !Array.isArray(tags)) {
+                var tags_arr = [tags];
+            } else if (tags) {
+                var tags_arr = tags
+            }
+
             const newTags = await Promise.all(
-                tags.map(async (tag) => {
+                tags_arr.map(async (tag) => {
                     const existingTag = await prisma.tag.findUnique({
                         where: { name: tag.name },
                     });
@@ -80,18 +99,23 @@ export default async function handler(req, res) {
                     },
                     parentId: parseInt(template.id),  // This is the key attribute that indicates it's a forked version
                     // Children is implicitly empty since it's a new template
-                }
+                },
+                include: {
+                    tags: true,
+                    user: true,
+                },
             });
     
             if (!forkedTemplate) {
-                return res.status(500).json({ error: "Failed to fork the Code Template." });
+                return res.status(500).json({ error: "Failed to fork the Code Template.", errorId: 5});
             }
     
             res.status(201).json({ template: forkedTemplate });
         } catch (error) {
-            return res.status(500).json({ error: error.message });
+            console.log("Error forking the template: ", error);
+            return res.status(500).json({ error: error.message, errorId: 6 });
         }
     } else {
-        res.status(405).json({ message: "Must be a GET or POST method." });
+        res.status(405).json({ message: "Must be a GET or POST method.", errorId: 0 });
     }
 }

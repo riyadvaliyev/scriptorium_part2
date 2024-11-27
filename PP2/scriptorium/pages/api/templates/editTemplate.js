@@ -18,16 +18,25 @@ export default async function handler(req, res) {
         const updates = {};
 
         const verified_token = verifyToken(req, res);
+        console.log("TAGS: ", tags);
         if (!verified_token) {
             return res.status(401).json({ error: "Unauthorized" });
         } else if (!templateId) {
             return res.status(400).json({ error: "Template ID is required." });
         } else if (!language || !["javascript", "python", "java", "c++", "c", "rust", "go", "r", "c#", "ruby"].includes(language.toLowerCase())) {
             return res.status(400).json({ error: "Valid language is required." });
+        } else if (!title && !explanation && !tags && !code) {
+            return res.status(400).json({ error: "At least one field is required to update." });
+        } else if (!explanation) {
+            return res.status(400).json({ error: "Explanation is required." });
+        } else if (tags == "" || (Array.isArray(tags) && tags.length === 0) || tags == null) {
+            console.log("CANNOT HAVE EMPTY TAGS");
+            return res.status(400).json({ error: "Tags cannot be empty." });
         }
 
         
         try {
+            console.log("THE INTENDED TEMPLATE ID IS: ", templateId);
             const template = await prisma.codeTemplate.findUnique({
                 where: {
                     id: parseInt(templateId),
@@ -38,7 +47,10 @@ export default async function handler(req, res) {
             // 404 request because it wasn't found and 403 because they're trying to access an unauthorized resource.
             if (!template) {
                 return res.status(404).json({ error: "Template not found." });
-            } else if (template.authorId !== verified_token.id) {
+            } else if (template.userId !== verified_token.id) {
+                console.log("IN HERE WTF");
+                console.log("TEMPLATE AUTHOR ID: ", template.userId);
+                console.log("VERIFIED TOKEN ID: ", verified_token.id);
                 return res.status(403).json({ error: "Forbidden Modification." });
             }
     
@@ -99,7 +111,7 @@ export default async function handler(req, res) {
             // 404 request because it wasn't found and 403 because they're trying to access an unauthorized resource.
             if (!template) {
                 return res.status(404).json({ error: "Template not found." });
-            } else if (template.authorId !== verified_token.id) {
+            } else if (template.userId !== verified_token.id) {
                 return res.status(403).json({ error: "Forbidden Deletion." });
             }
 
