@@ -26,6 +26,7 @@ interface Template {
     user?: {
         firstName?: string;
         lastName?: string;
+        email?: string;
     };
     tags?: { 
         id: number;
@@ -42,6 +43,44 @@ interface TemplateListProps {
 //     id: number;
 //     name: string;
 // }
+
+const RunButton = ({ template }: { template: Template }) => {
+  const router = useRouter();
+
+  const title = template.title;
+  const explanation = template.explanation;
+  const code = template.code;
+  const language = template.language;
+  const author = template.user?.email || "";
+  let tagString = "";
+
+  // convert tags to a string, comma separated
+  template.tags?.forEach((tag) => {
+    tagString += tag.name + ", ";
+  });
+
+  const handleRunClick = () => {
+    localStorage.setItem('editorData', JSON.stringify({
+      templateId: template.id,
+      title: title,
+      explanation: explanation,
+      code: code,
+      language: language,
+      tags: tagString,
+      author: author,
+  }));
+
+    router.push({ pathname: `/editor/${template.id}` });
+  }
+
+  return (
+    <button 
+      onClick={handleRunClick}
+      className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+      Run ▶
+    </button>
+  );
+}
 
 const TemplateList: React.FC<TemplateListProps> = ({ templates = [] }) => {
   const router = useRouter();
@@ -102,11 +141,12 @@ const TemplateList: React.FC<TemplateListProps> = ({ templates = [] }) => {
             </div>
         </div>
           <div className="mt-4 flex justify-between items-center">
-            <Link href={`/templates/${template.id}`}>
+            <RunButton template={template} />
+            {/* <Link href={`/editor/${template.id}`}>
                 <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
                     Run ▶
                 </button>
-            </Link>
+            </Link> */}
             {/* <button
               className="text-blue-500 hover:underline"
               onClick={() => router.push(`/template/${template.id}`)}
