@@ -102,7 +102,7 @@ const TemplatesSection: React.FC = () => {
 
   return (
   <>
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-2">
       <TemplateSearchBar onSearchChange={setSearchTerm} />
       <TemplateExplanationSearchBar onSearchChange={setCodeExplanationSearchTerm} />
       <TemplateTagsSearchBar onSearchChange={setTagsSearchTerm} />
