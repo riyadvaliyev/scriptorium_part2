@@ -23,10 +23,10 @@ import "ace-builds/src-noconflict/mode-javascript";  // For JavaScript
 import "ace-builds/src-noconflict/mode-java";  // For Java
 import "ace-builds/src-noconflict/mode-c_cpp";  // For C and C++
 import "ace-builds/src-noconflict/mode-rust";  // For Rust
-import "ace-builds/src-noconflict/mode-r";  // For R
 import "ace-builds/src-noconflict/mode-ruby";  // For Ruby
-import "ace-builds/src-noconflict/mode-csharp";  // For C#
 import "ace-builds/src-noconflict/mode-golang"; // For Go
+import "ace-builds/src-noconflict/mode-r";  // For R
+import "ace-builds/src-noconflict/mode-lisp";  // For Lisp
 // Loading the styling for the text boxes
 // NOTE: The old editor themes (light and dark mode) were: solarized_light and solarized_dark respectively
 import "ace-builds/src-noconflict/theme-monokai"; // Loading the Solarized Light theme into the editor
@@ -126,10 +126,10 @@ const LanguageSelector =  ({ onChange, codeLanguage }: { onChange: (newLanguage:
     <option value="c">C</option>
     <option value="c++">C++</option>
     <option value="rust">Rust</option>
-    <option value="r">R</option>
     <option value="ruby">Ruby</option>
-    <option value="csharp">C#</option>
     <option value="go">Go</option>
+    <option value="r">R</option>
+    <option value="lisp">Lisp</option>
   </select>
 );
 
@@ -496,7 +496,7 @@ const ExecuteCodePage: React.FC = () => {
   }
 
   // Defining the code content state variable + function to manage state
-  const codeContentFromTemplate = "print('Hello World')";
+  const codeContentFromTemplate = "";
   const [codeContent, handleCodeContentChange] = useCodeState(codeContentFromTemplate);
 
   // Defining the stdin content state variable + function to manage state
