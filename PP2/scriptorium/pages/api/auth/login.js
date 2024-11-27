@@ -13,7 +13,7 @@ export default async function handler(req, res) {
             const accessToken = jwt.sign({ id: user.id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
             const refreshToken = jwt.sign({ id: user.id, role: user.role }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
-            res.status(200).json({ id: user.id, accessToken, refreshToken });
+            res.status(200).json({ id: user.id, role: user.role, accessToken, refreshToken });
         } else {
             res.status(401).json({ error: "Invalid credentials." });
         }
