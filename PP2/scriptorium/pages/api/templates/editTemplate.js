@@ -28,6 +28,7 @@ export default async function handler(req, res) {
 
         
         try {
+            console.log("THE INTENDED TEMPLATE ID IS: ", templateId);
             const template = await prisma.codeTemplate.findUnique({
                 where: {
                     id: parseInt(templateId),
@@ -38,7 +39,10 @@ export default async function handler(req, res) {
             // 404 request because it wasn't found and 403 because they're trying to access an unauthorized resource.
             if (!template) {
                 return res.status(404).json({ error: "Template not found." });
-            } else if (template.authorId !== verified_token.id) {
+            } else if (template.userId !== verified_token.id) {
+                console.log("IN HERE WTF");
+                console.log("TEMPLATE AUTHOR ID: ", template.userId);
+                console.log("VERIFIED TOKEN ID: ", verified_token.id);
                 return res.status(403).json({ error: "Forbidden Modification." });
             }
     
@@ -99,7 +103,7 @@ export default async function handler(req, res) {
             // 404 request because it wasn't found and 403 because they're trying to access an unauthorized resource.
             if (!template) {
                 return res.status(404).json({ error: "Template not found." });
-            } else if (template.authorId !== verified_token.id) {
+            } else if (template.userId !== verified_token.id) {
                 return res.status(403).json({ error: "Forbidden Deletion." });
             }
 
