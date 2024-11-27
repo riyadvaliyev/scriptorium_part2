@@ -22,7 +22,7 @@ const BlogPostsSection: React.FC = () => {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const postsPerPage = 5;
+  const postsPerPage = 10;
 
   // Delete blog post
   const handleDelete = async (postId: number) => {
