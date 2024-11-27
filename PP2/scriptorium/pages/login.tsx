@@ -23,11 +23,12 @@ const LoginPage: React.FC = () => {
         throw new Error(errorData.message || 'Invalid email or password');
       }
 
-      const { id, accessToken, refreshToken } = await response.json();
+      const { id, role, accessToken, refreshToken } = await response.json();
 
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('userId', id.toString());
+      localStorage.setItem('userRole', role);
 
       router.push('/dashboard');
     } catch (err) {

@@ -187,8 +187,18 @@ const BlogPostDetail: React.FC = () => {
           >
             - {post?.downvotes || 0}
           </button>
+          <button
+            className="text-blue-500 font-bold ml-4"
+            onClick={() =>
+              router.push({
+                pathname: "/report",
+                query: { contentType: "BlogPost", blogPostId: post.id },
+              })
+            }
+          >
+            Report
+          </button>
         </div>
-
         {/* Code Templates Section */}
         <div className="mt-6 mb-6">
           <h2 className="text-2xl font-semibold mb-4">Code Templates</h2>
@@ -197,7 +207,7 @@ const BlogPostDetail: React.FC = () => {
               post.codeTemplateLinks.map((template) => (
                 <a
                   key={template.id}
-                  href={template.link || '#'}
+                  href={`/editor/${template.id}` || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block p-3 border rounded-md shadow-sm hover:shadow-md bg-blue-50 hover:bg-blue-100 transition-all"

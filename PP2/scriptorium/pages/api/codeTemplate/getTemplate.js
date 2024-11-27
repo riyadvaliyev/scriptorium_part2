@@ -12,7 +12,8 @@ export default async function handler(req, res) {
       const template = await prisma.codeTemplate.findUnique({
         where: { id: parseInt(id) },
         include: {
-          user: { select: { firstName: true, lastName: true } }, // Optional: Include author details
+          user: { select: { firstName: true, lastName: true, email: true } }, // Optional: Include author details
+          tags: true,
         },
       });
   

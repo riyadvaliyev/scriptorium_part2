@@ -10,10 +10,11 @@ export default async function handler(req, res) {
         const user = await prisma.user.findUnique({ where: { email } });
 
         if (user && await bcrypt.compare(password, user.password)) {
-            const accessToken = jwt.sign({ id: user.id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+            const accessToken = jwt.sign({ id: user.id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '60m' });
+            
             const refreshToken = jwt.sign({ id: user.id, role: user.role }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
-            res.status(200).json({ id: user.id, accessToken, refreshToken });
+            res.status(200).json({ id: user.id, role: user.role, accessToken, refreshToken });
         } else {
             res.status(401).json({ error: "Invalid credentials." });
         }
@@ -21,6 +22,5 @@ export default async function handler(req, res) {
         res.setHeader("Allow", ["POST"]);
         res.status(405).end(`Method ${req.method} Not Allowed`);
     }
-
 
 }
