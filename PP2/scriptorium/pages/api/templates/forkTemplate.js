@@ -28,12 +28,12 @@ export default async function handler(req, res) {
         const verified_token = verifyToken(req, res);
 
         if (!verified_token) {
-            return res.status(401).json({ error: "Invalid token" });
+            return res.status(401).json({ error: "Invalid token", errorId: 1 });
         }
 
         // language check:
         if (!language || !["javascript", "python", "java", "c++", "c", "ruby", "go", "rust", "r", "c#"].includes(language.toLowerCase())) {
-            return res.status(400).json({ error: "Valid language is required." });
+            return res.status(400).json({ error: "Valid language is required.", errorId: 2 });
         }
         
         try {
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
             });
     
             if (!user) {
-                return res.status(401).json({ error: "User not found" });
+                return res.status(401).json({ error: "User not found", errorId: 3 });
             }
     
             const template = await prisma.codeTemplate.findUnique({
@@ -54,7 +54,7 @@ export default async function handler(req, res) {
             });
     
             if (!template) {
-                return res.status(404).json({ error: "Template not found" });
+                return res.status(404).json({ error: "Template not found", errorId: 4 });
             }
     
             const newTags = await Promise.all(
@@ -80,18 +80,22 @@ export default async function handler(req, res) {
                     },
                     parentId: parseInt(template.id),  // This is the key attribute that indicates it's a forked version
                     // Children is implicitly empty since it's a new template
-                }
+                },
+                include: {
+                    tags: true,
+                    user: true,
+                },
             });
     
             if (!forkedTemplate) {
-                return res.status(500).json({ error: "Failed to fork the Code Template." });
+                return res.status(500).json({ error: "Failed to fork the Code Template.", errorId: 5});
             }
     
             res.status(201).json({ template: forkedTemplate });
         } catch (error) {
-            return res.status(500).json({ error: error.message });
+            return res.status(500).json({ error: error.message, errorId: 6 });
         }
     } else {
-        res.status(405).json({ message: "Must be a GET or POST method." });
+        res.status(405).json({ message: "Must be a GET or POST method.", errorId: 0 });
     }
 }
