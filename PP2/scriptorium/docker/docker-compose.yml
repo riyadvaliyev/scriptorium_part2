@@ -112,6 +112,20 @@ services:
       resources:
         limits:
           memory: 512m  # Set memory limit to 512 MB
+  
+  r_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.R  # Path to the Dockerfile for Swift
+    container_name: r_container
+    image: r_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          memory: 512m  # Set memory limit to 512 MB
 
 
 networks:
