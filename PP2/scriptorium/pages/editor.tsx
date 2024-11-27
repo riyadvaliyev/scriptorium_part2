@@ -89,6 +89,35 @@ const useLoadingState = () => {
   return [isLoading, setLoadingState] as const;
 };
 
+const useLanguageState = () => {
+  // python will be the default
+  const [codeLanguage, setCodeLanguage] = useState("python");
+
+  function changeCodeLanguage(newCodeLanguage: string) {
+    console.log("new code language: ", newCodeLanguage);
+    setCodeLanguage(newCodeLanguage);
+  }
+
+  return [codeLanguage, changeCodeLanguage] as const;
+}
+
+const LanguageSelector =  ({ onChange, codeLanguage }: { onChange: (newLanguage: string) => void, codeLanguage: string }) => 
+  (
+    <select className="border rounded p-2" onChange={(e) => onChange(e.target.value)} value={codeLanguage}>
+      <option value="python">Python</option>
+      <option value="javascript">JavaScript</option>
+      <option value="java">Java</option>
+      <option value="c">C</option>
+      <option value="cpp">C++</option>
+      <option value="rust">Rust</option>
+      <option value="r">R</option>
+      <option value="ruby">Ruby</option>
+      <option value="csharp">C#</option>
+      <option value="golang">Go</option>
+    </select>
+  );
+
+
 //CodeEditor instance: A glorified text box where raw code can be inputted (can either be typed out by user or imported via code template)
 // Define the types for the props of the CodeEditor component
 // Arguments for the CodeEditor
@@ -197,6 +226,7 @@ const handleRunCodeClick = async (
   });
 
   try {
+    console.log("code language OMG: ", codeLanguage);
     const response = await fetch("/api/executeCode", {
       method: "POST",
       headers: {
@@ -223,11 +253,13 @@ const handleRunCodeClick = async (
 // Main component to bring everything together
 const ExecuteCodePage: React.FC = () => {
 
+  const [codeLanguage, changeCodeLanguage] = useLanguageState();
+
   // TODO: Eventually, these would be populated by the template attributes
   const codeLanguageFromTemplate = "python"; // FIXME: Placeholder. corresponds to the <code> attribute of the template
 
   // Need to adjust the code language passed into the AceEditor (not exactly a 1 to 1 match with the languages listed in executeCode.js)
-  let codeLanguageForStyling = codeLanguageFromTemplate;
+  let codeLanguageForStyling = codeLanguage;
   if (codeLanguageForStyling === "c" || codeLanguageForStyling === "c++"){
     codeLanguageForStyling = "c_cpp"
   }
@@ -262,6 +294,9 @@ const ExecuteCodePage: React.FC = () => {
           <p className="text-lg font-medium">Code Execution Time Limit: 20 seconds</p>
         </div>
           {/* Main content layout */}
+          <span className="text-lg font-small mb-2">Language: </span>
+
+          <LanguageSelector onChange={changeCodeLanguage} codeLanguage={codeLanguage} />
           <div className="flex flex-col lg:flex-row lg:space-x-6">
             {/* Left-side: Code input and Stdin */}
             <div className="flex-1 space-y-6">
@@ -295,7 +330,7 @@ const ExecuteCodePage: React.FC = () => {
               onClick={(controllerRef, isLoading) =>
                 handleRunCodeClick(
                   codeContent,
-                  codeLanguageFromTemplate,
+                  codeLanguage,
                   stdinContent,
                   setStdoutContent,
                   setStderrContent,
