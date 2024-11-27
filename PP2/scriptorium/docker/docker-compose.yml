@@ -85,12 +85,26 @@ services:
         limits:
           memory: 512m  # Set memory limit to 512 MB
 
-  swift_service:
+  rust_service:
     build:
       context: .  # Set the context to the current folder (docker)
-      dockerfile: DockerFile.Swift  # Path to the Dockerfile for Swift
-    container_name: swift_container
-    image: swift_image
+      dockerfile: DockerFile.Rust  # Path to the Dockerfile for Swift
+    container_name: rust_container
+    image: rust_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          memory: 512m  # Set memory limit to 512 MB
+
+  go_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.Go  # Path to the Dockerfile for Swift
+    container_name: go_container
+    image: go_image
     networks:
       - scriptorium_network
     tty: true  # Keeps the container running
