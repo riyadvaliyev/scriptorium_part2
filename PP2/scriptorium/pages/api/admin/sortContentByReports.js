@@ -85,8 +85,8 @@ export default async function handler(req, res) {
         // Defining common returned variable
         let retrievedContent = [];
         // Defining common search condition
-        const contentSearchCondition = { hidden: false };
-
+        const contentSearchCondition = {};
+        
         // Fetching all non-hidden blog posts
         if (contentType === "BlogPost") {
             retrievedContent = await prisma.blogPost.findMany({
