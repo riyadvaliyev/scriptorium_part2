@@ -8,6 +8,7 @@ const Navbar: React.FC = () => {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State to control hamburger menu visibility
 
   // Access the theme context
   const { isDarkMode } = useContext(ThemeContext) || {};
@@ -39,16 +40,47 @@ const Navbar: React.FC = () => {
 
   return (
     <nav
+      id="navbar"
       className={`py-4 px-6 flex justify-between items-center ${
         isDarkMode ? 'bg-blue-600 text-white' : 'bg-blue-600 text-white'
       }`} // Conditionally style Navbar based on theme
     >
+      {/* Logo on the left */}
       <div className="text-xl font-bold">
         <Link href="/" className="hover:underline">
           Scriptorium
         </Link>
       </div>
-      <div className="space-x-4 flex items-center">
+
+      {/* Hamburger Menu on small screens */}
+      <div className="md:hidden flex items-center">
+        <button
+          id="hamburger-menu"
+          className="text-white"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+      </div>
+
+      {/* Navigation Links */}
+      <div
+        id="nav-links"
+        className="space-x-4 flex items-center hidden md:flex"
+      >
         <Link href="/blog" className="hover:underline">
           Blog Posts
         </Link>
@@ -83,11 +115,54 @@ const Navbar: React.FC = () => {
         {/* Add the ThemeToggle button */}
         <ThemeToggle />
       </div>
+
+      {/* Navigation Links for Small Screens */}
+      <div
+        id="nav-links-sm"
+        className={`flex flex-col space-y-4 absolute top-0 right-0 w-full bg-blue-600 p-4 md:hidden ${isMenuOpen ? 'block' : 'hidden'}`}
+      >
+        <Link href="/blog" className="hover:underline">
+          Blog Posts
+        </Link>
+        <Link href="/templates" className="hover:underline">
+          Code Templates
+        </Link>
+        <Link href="/editor" className="hover:underline">
+          Code Editor
+        </Link>
+        {isAdmin && (
+          <Link href="/admin/reports" className="hover:underline">
+            Admin Panel
+          </Link>
+        )}
+        <button className="hover:underline text-left" onClick={handleDashboardClick}>
+          Dashboard
+        </button>
+        {isLoggedIn ? (
+          <button className="hover:underline text-left" onClick={handleLogout}>
+            Logout
+          </button>
+        ) : (
+          <>
+            <Link href="/login" className="hover:underline text-left">
+              Login
+            </Link>
+            <Link href="/signup" className="hover:underline text-left">
+              Signup
+            </Link>
+          </>
+        )}
+        {/* Add the ThemeToggle button */}
+        <ThemeToggle />
+      </div>
     </nav>
   );
 };
 
 export default Navbar;
+
+
+
 
 
 // // src/components/Navbar.tsx
