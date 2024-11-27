@@ -62,19 +62,31 @@ export default async function handler(req, res) {
             where: filter_settings,
             skip: skip,
             take: intPageSize,
-            orderBy: { id: 'desc'}
+            orderBy: { id: 'desc'},
+            include: {
+                user: true, // This ensures the `user` relation is loaded
+                tags: true, // Include tags if needed
+            },
         });
 
         const count = await prisma.codeTemplate.count();
         const totalPages = Math.ceil(count / intPageSize);
+        const filteredCount = await prisma.codeTemplate.count(
+            { 
+                where: filter_settings
+            }
+        );
+        const filteredTotalPageCount = Math.ceil(filteredCount / intPageSize);
 
         res.status(200).json({
             data: templates,
             meta: {
-              currentPage: intPage,
-              pageSize: intPageSize,
-              totalPages: totalPages,
-              totalCount: count,
+                currentPage: intPage,
+                pageSize: intPageSize,
+                totalPages: totalPages,
+                filteredTotalPageCount: filteredTotalPageCount,
+                filteredTotalCount: filteredCount,
+                totalCount: count,
             }
           });
     } catch (error) {
