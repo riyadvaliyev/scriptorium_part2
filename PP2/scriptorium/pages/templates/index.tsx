@@ -7,7 +7,6 @@ import TemplateContentSearchBar from '@/components/Template/TemplateContentSearc
 import TemplateTagsSearchBar from '@/components/Template/TemplateTagsSearchBar';
 import { pages } from 'next/dist/build/templates/app-page';
 
-// Define the Template type
 interface Template {
     id: number;
     title: string;
@@ -27,15 +26,11 @@ interface Template {
 
 const Template: React.FC = () => {
     const [templates, setTemplates] = useState<Template[]>([]);
-    //   const [filteredTemplates, setFilteredTemplates] = useState<Template[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [codeContentSearchTerm, setCodeContentSearchTerm] = useState('');
     const [tagsSearchTerm, setTagsSearchTerm] = useState('');
-    //   const [sortOption, setSortOption] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    // const [totalTemplates, setTotalTemplates] = useState(0);
     const [totalFilteredPages, setTotalFilteredPages] = useState(0);
-    // const pageNumber = 1;
     const pageSize = 7;
 
     const fetchTemplatesWithFilter = async () => {
@@ -45,7 +40,7 @@ const Template: React.FC = () => {
             if (codeContentSearchTerm) params.append('content', codeContentSearchTerm);
             // filter tags:
             if (tagsSearchTerm) {
-                console.log("in tagsSearchTerm");
+                // console.log("in tagsSearchTerm");
                 // check if first character is a comma, remove it
                 if (tagsSearchTerm.charAt(0) === ',') {
                     // can't update tagsSearchTerm directly, so update it through setTagsSearchTerm
@@ -60,25 +55,21 @@ const Template: React.FC = () => {
                 tags = tags.map(tag => tag.trim());
                 // append each tag to params
                 tags.forEach(tag => { params.append('tags', tag); });
-                console.log("tags:", tags);
-                console.log("params:", params);
+                // console.log("tags:", tags);
+                // console.log("params:", params);
             }
             params.append('page', String(currentPage)); // Add default pagination
             params.append('pageSize', String(pageSize)); // Add default pagination
 
-            console.log("api literal:", `/api/templates/searchTemplate?${params.toString()}`);
+            // console.log("api literal:", `/api/templates/searchTemplate?${params.toString()}`);
             const response = await fetch(`/api/templates/searchTemplate?${params.toString()}`);
 
             // const response = await fetch(`/api/templates/searchTemplate`);
             if (!response.ok) throw new Error('Failed to fetch code templates');
             const data = await response.json();
-            // setCurrentPage(1); // Reset to the first page
-            // setTotalTemplates(data.meta.filteredTotalCount);
             setTotalFilteredPages(data.meta.filteredTotalPageCount);
             // console.log('totalTemplates:', totalTemplates);
-            console.log('totalFilteredPages:', totalFilteredPages);
-            // console.log('total_count:', totalCount);
-            // console.log('Fetched Templates:', data.data);
+            // console.log('totalFilteredPages:', totalFilteredPages);
             setTemplates(data.data as Template[]);
 
             if (totalFilteredPages === 0) {
