@@ -73,8 +73,7 @@ interface EditButtonProps {
             // console.log("here first")
             router.push('/login');
         } else if (data.error) {
-            console.log("Error editing template", data.error);
-            window.alert("Error editing template. Please try again later."); 
+            throw new Error(data.error);
         }
         else {
             // console.log("Edited template ID:", template.id);
@@ -106,9 +105,13 @@ interface EditButtonProps {
             //   window.location.href = '/login';  // redirects to the login page
             // router.push('/login');
             //   window.prompt("You must be logged in to edit a template. Please log in.");
-        } else {
+        } else if (error.message === "Tags cannot be empty.") {
+            // console.error("Error forking template", error);
+            window.alert("Must input at least one tag.");
+        } 
+        else {
             // console.error("Error editing template", error);
-            window.alert("Error editing template. Please try again later.");
+            window.alert(`Error editing template. ${error.message}`);
         }
       }
     };

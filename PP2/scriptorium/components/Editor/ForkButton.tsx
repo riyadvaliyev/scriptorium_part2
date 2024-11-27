@@ -74,7 +74,7 @@ interface ForkButtonProps {
             router.push('/login');
         } else if (data.error) {
             // console.error("Error forking template", data.error);
-            window.alert("Error forking template. Please try again later.");
+            throw new Error(data.error);
         } else {
             // console.log("Forked template ID:", template.id);
             localStorage.setItem('editorData', JSON.stringify({
@@ -93,8 +93,8 @@ interface ForkButtonProps {
             // window.location.href = `/templates/${template.id}`
         }
       } catch (error: any) {
-        // console.log("Error forking template", error);
-        // console.error(error.message);
+        console.log("Error forking template", error);
+        console.error(error.message);
         
         // this means the user is not logged in (invalid token)
         if (error?.errorId === 1 || error?.errorId === 3 || error === "Unauthorized" || error === "Token is not valid") {  // Invalid Token or User Not Found
@@ -104,9 +104,13 @@ interface ForkButtonProps {
             //   window.location.href = '/login';  // redirects to the login page
             router.push('/login');
             //   window.prompt("You must be logged in to fork a template. Please log in.");
-        } else {
+        } else if (error.message === "Tags are required.") {
             // console.error("Error forking template", error);
-            window.alert("Error forking template. Please try again later.");
+            window.alert("Must input at least one tag.");
+        }
+        else {
+            // console.error("Error forking template", error);
+            window.alert(`Error forking template. ${error.message}`);
         }
       }
     };

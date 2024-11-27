@@ -203,7 +203,7 @@ const TitleInput = ({ onChange, title }: { onChange: (newTitle: string) => void,
   <input
     type="text"
     placeholder="Title"
-    className="border rounded p-2"
+    className="border rounded-lg p-4 w-full text-sm"
     onChange={(e) => onChange(e.target.value)}
     value={title}
   />
@@ -213,7 +213,7 @@ const ExplanationInput = ({ onChange, explanation }: { onChange: (newExplanation
   <input
     type="text"
     placeholder="Explanation"
-    className="border rounded p-2"
+    className="border rounded-lg p-4 w-full text-sm"
     onChange={(e) => onChange(e.target.value)}
     value={explanation}
   />
@@ -222,8 +222,8 @@ const ExplanationInput = ({ onChange, explanation }: { onChange: (newExplanation
 const TagsInput = ({ onChange, tags }: { onChange: (newTags: string) => void, tags: string }) => (
   <input
     type="text"
-    placeholder="Tags"
-    className="border rounded p-2"
+    placeholder="Tags (comma-separated)"
+    className="border rounded-lg p-4 w-full text-sm"
     onChange={(e) => onChange(e.target.value)}
     value={tags}
   />
@@ -522,26 +522,30 @@ const ExecuteCodePage: React.FC = () => {
           <p className="text-lg font-medium">Code Execution Time Limit: 20 seconds</p>
         </div>
           {/* Main content layout */}
-          <span className="text-lg font-small mb-2">Language: </span>
-
           <div className="flex justify-between items-center w-full">
             <TitleInput onChange={changeCodeTitle} title={codeTitle} />
             <ExplanationInput onChange={changeCodeExplanation} explanation={codeExplanation} />
             <TagsInput onChange={changeCodeTags} tags={codeTags} />
           </div>
 
-          <div className="flex justify-between items-center w-full">
+          {/* Used GPT for this specific div to align it properly*/}
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <label className="text-lg font-small">Language:</label>
               <LanguageSelector onChange={changeCodeLanguage} codeLanguage={codeLanguage} />
-              {templateId !== -1 && 
-              <ForkButton
-                templateId={templateId as number}
-                title={codeTitle as string}
-                explanation={codeExplanation as string}
-                code={codeContent as string}
-                language={codeLanguage as string}
-                tags={codeTags as string}
-              />}
-              {/* </Link> */}
+            </div>
+            {templateId !== -1 && (
+              <div className="ml-auto">
+                <ForkButton
+                  templateId={templateId as number}
+                  title={codeTitle as string}
+                  explanation={codeExplanation as string}
+                  code={codeContent as string}
+                  language={codeLanguage as string}
+                  tags={codeTags as string}
+                />
+              </div>
+            )}
           </div>
           <div className="flex justify-between items-center w-full">
               {((currentUser !== codeAuthor && templateId === -1) || templateId === -1) &&
