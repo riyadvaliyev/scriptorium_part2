@@ -141,10 +141,16 @@ function regexCleaningInput(language, inputString){
     else if (language === "rust") {
         let cleanedInputString = inputString
             // Trim leading/trailing whitespace
-            .trim();                  
+            ?.trim();                  
         
         return cleanedInputString;
     }
+    else if (language === "go") {
+        let cleanedInputString = inputString
+        ?.trim(); // Trim any leading or trailing whitespace
+        return cleanedInputString;
+    }
+    
     
 }
 
@@ -193,10 +199,19 @@ export async function cleanUpTempCodeFiles(inputCode, language){
     }
     
     else if (language === "rust"){
-        const tempCFileName = "tempRustFile"
+        const tempRustFileName = "tempRustFile"
         try {
-            await execAsync(`rm ${tempCFileName}.rs`);
-            await execAsync(`rm ${tempCFileName}`);
+            await execAsync(`docker exec -u root -i rust_container rm -f /tmp/${tempRustFileName}.rs`);
+            await execAsync(`docker exec -u root -i rust_container rm -f /tmp/${tempRustFileName}`);
+        } catch (error) {
+            console.error("Error deleting the temporary Rust file and executable:", error);
+        }  
+    }
+    else if (language === "go"){
+        const tempGoFileName = "tempGoFile"
+        try {
+            await execAsync(`docker exec -u root -i go_container rm -f /tmp/${tempGoFileName}.go`);
+            await execAsync(`docker exec -u root -i go_container rm -f /tmp/${tempGoFileName}`);
         } catch (error) {
             console.error("Error deleting the temporary Rust file and executable:", error);
         }  
@@ -234,6 +249,12 @@ async function dockerCompileCode(inputCode, language, stdin) {
     }
     else if (language === "ruby"){
         containerName = "ruby_container";
+    }
+    else if (language === "rust"){
+        containerName = "rust_container";
+    }
+    else if (language === "go"){
+        containerName = "go_container";
     }
     
     // Determine the docker execution command to run
@@ -309,13 +330,57 @@ async function dockerCompileCode(inputCode, language, stdin) {
         // Using timeout to limit execution time and echo for stdin handling
         codeCommand = `docker exec -i '${containerName}' bash -c "echo '${cleanedStdin}' | timeout --signal=SIGKILL 20s ruby -w -e '${cleanedInputCode}'"`;
     }
+    else if (language === "rust") {
+        const tempRustFileName = "tempRustFile";  // Name for the Rust source file (without .rs)
+        const tempRustFilePath = `/tmp/${tempRustFileName}.rs`; // Correct file path for the source file
     
-    //     else if (language === "ruby") {
-//         // Ruby is an interpreted language (like Python, JS), so no need to compile
-//         // Using the -w flag to enable warnings
-//         codeCommand = `echo "${cleanedStdin}" | ruby -w -e "${cleanedInputCode}"`;
+        // Write the cleaned input code to a temporary Rust file
+        fs.writeFileSync(tempRustFilePath, cleanedInputCode);
+    
+        // Copy the file to the Docker container
+        await execAsync(`docker cp ${tempRustFilePath} '${containerName}':/tmp/${tempRustFileName}.rs`);
+    
+        // Compile the Rust code inside the container and specify the output executable
+        const { stderr } = await execAsync(`docker exec -i '${containerName}' rustc /tmp/${tempRustFileName}.rs -o /tmp/${tempRustFileName}`);
+    
+        // Capture any compilation warnings
+        warnings = stderr;
+    
+        // Run the compiled Rust executable inside the container
+        codeCommand = `echo '${cleanedStdin}' | docker exec -i '${containerName}' timeout --signal=SIGKILL 20s sh -c '/tmp/${tempRustFileName}'`;
+    }
+    else if (language === "go") {
+        const tempGoFileName = "tempGoFile";
+        const tempGoFilePath = `/tmp/${tempGoFileName}.go`;
+    
+        // Write the cleaned input code to the Go file
+        fs.writeFileSync(tempGoFilePath, cleanedInputCode);
+    
+        // Copy the file to the Docker container
+        await execAsync(`docker cp ${tempGoFilePath} '${containerName}':/tmp/${tempGoFileName}.go`);
+
+        // Compile the Go code inside the container and specify the output executable
+        const { stderr } = await execAsync(`docker exec -i 'go_container' go build -o /tmp/${tempGoFileName} /tmp/${tempGoFileName}.go`);
+
+        // Capture any compilation warnings
+        warnings = stderr;
+    
+        // Command to run the code with stdin handling
+        codeCommand = `echo '${cleanedStdin}' | docker exec -i '${containerName}' timeout --signal=SIGKILL 20s sh -c '/tmp/${tempGoFileName}'`;
+    }    
+    //     else if (language === "rust"){
+//         // Rust requires compilation using `cargo` or `rustc`
+//         // Write the code to a temporary file
+//         const tempRustFileName = "tempRustFile.rs";
+//         fs.writeFileSync(tempRustFileName, cleanedInputCode);
+
+//         // Compile the Rust file using rustc (Rust's compiler)
+//         const { stderr } = await execAsync(`rustc ${tempRustFileName}`);
+//         warnings = stderr; // Capture any warnings from the compilation
+
+//         // Run the compiled Rust program (default executable is the name of the source file without extension)
+//         codeCommand = `echo "${cleanedStdin}" | ./tempRustFile`;  // The compiled executable will be `tempRustFile` by default
 //     }
-    
     return { codeCommand, warnings }
 
 }
