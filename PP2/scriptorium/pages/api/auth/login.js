@@ -11,6 +11,7 @@ export default async function handler(req, res) {
 
         if (user && await bcrypt.compare(password, user.password)) {
             const accessToken = jwt.sign({ id: user.id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '60m' });
+            
             const refreshToken = jwt.sign({ id: user.id, role: user.role }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
             res.status(200).json({ id: user.id, role: user.role, accessToken, refreshToken });

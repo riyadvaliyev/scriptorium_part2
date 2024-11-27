@@ -17,6 +17,7 @@ export default function handler(req, res) {
 
     // Generate new access token if refresh token is valid
     const newAccessToken = jwt.sign({ id: user.id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '60m' });
+    
     res.json({ accessToken: newAccessToken });
   });
 }

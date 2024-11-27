@@ -23,6 +23,7 @@ export default async function handler(req, res) {
         });
   
         const accessToken = jwt.sign({ id: user.id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '60m' });
+        
         const refreshToken = jwt.sign({ id: user.id, role: user.role }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
   
         // Send success response if user creation is successful
