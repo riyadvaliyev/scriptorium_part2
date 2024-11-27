@@ -13,6 +13,8 @@ interface BlogPost {
   upvotes: number;
   downvotes: number;
   createdAt: string;
+  hidden: boolean;
+  authorId: number;
   author?: {
     firstName?: string;
     lastName?: string;
@@ -36,8 +38,23 @@ const Blog: React.FC = () => {
         const response = await fetch(`/api/blog/getPosts`);
         if (!response.ok) throw new Error('Failed to fetch posts');
         const data = await response.json();
-        setPosts(data.posts as BlogPost[]);
-        setFilteredPosts(data.posts as BlogPost[]);
+        // setPosts(data.posts as BlogPost[]);
+        // setFilteredPosts(data.posts as BlogPost[]);
+        const userRole = localStorage.getItem('userRole');
+        const userId = parseInt(localStorage.getItem('userId') || '0', 10);
+
+        let filteredData = data.posts as BlogPost[];
+
+        // Apply filtering logic based on user role
+        if (userRole !== 'ADMIN') {
+          filteredData = filteredData.filter(
+            (post) => !post.hidden || post.authorId === userId // Include non-hidden posts or posts authored by the user
+          );
+        }
+
+        setPosts(filteredData);
+        setFilteredPosts(filteredData);
+
       } catch (error) {
         console.error('Error fetching posts:', error);
       }
