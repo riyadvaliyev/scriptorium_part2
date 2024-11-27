@@ -150,6 +150,11 @@ function regexCleaningInput(language, inputString){
         ?.trim(); // Trim any leading or trailing whitespace
         return cleanedInputString;
     }
+    else if (language === "lisp") {
+        let cleanedInputString = inputString?.trim(); // Simply trim whitespace
+        return cleanedInputString;
+    }
+    
     
 }
 
@@ -212,8 +217,17 @@ export async function cleanUpTempCodeFiles(inputCode, language){
             await execAsync(`docker exec -u root -i go_container rm -f /tmp/${tempGoFileName}.go`);
             await execAsync(`docker exec -u root -i go_container rm -f /tmp/${tempGoFileName}`);
         } catch (error) {
-            console.error("Error deleting the temporary Rust file and executable:", error);
+            console.error("Error deleting the temporary Go file and executable:", error);
         }  
+    }
+    else if (language === "lisp"){
+        const tempLispFileName = "tempLispFile"
+        try {
+            await execAsync(`docker exec -u root -i lisp_container rm -f /tmp/${tempLispFileName}.lisp`);
+        } catch (error) {
+            console.error("Error deleting the temporary Lisp file and executable:", error);
+        }  
+
     }
 }
 
@@ -257,6 +271,9 @@ async function dockerCompileCode(inputCode, language, stdin) {
     }
     else if (language === "r"){
         containerName = "r_container";
+    }
+    else if (language === "lisp"){
+        containerName = "lisp_container"
     }
     
     // Determine the docker execution command to run
@@ -371,8 +388,22 @@ async function dockerCompileCode(inputCode, language, stdin) {
         codeCommand = `echo '${cleanedStdin}' | docker exec -i '${containerName}' timeout --signal=SIGKILL 20s sh -c '/tmp/${tempGoFileName}'`;
     }
     else if (language === "r"){
-        codeCommand = `echo "${cleanedStdin}" | docker exec -i '${containerName}' Rscript -e "${cleanedInputCode}"`;
+        codeCommand = `echo "${cleanedStdin}" | docker exec -i '${containerName}' timeout --signal=SIGKILL 20s Rscript -e "${cleanedInputCode}"`;
+
     }
+    else if (language === "lisp") {
+        const tempLispFileName = "tempLispFile";
+        const tempLispFilePath = `/tmp/${tempLispFileName}.lisp`;
+    
+        // Write the cleaned Lisp code to a temporary file
+        fs.writeFileSync(tempLispFilePath, cleanedInputCode);
+    
+        // Copy the file to the Docker container
+        await execAsync(`docker cp ${tempLispFilePath} '${containerName}':/tmp/${tempLispFileName}.lisp`);
+    
+        // Run the Lisp code using SBCL and pipe the stdin
+        codeCommand = `docker exec -i '${containerName}' bash -c "echo '${cleanedStdin}' | timeout --signal=SIGKILL 20s sbcl --script /tmp/${tempLispFileName}.lisp"`;
+    }    
     return { codeCommand, warnings }
 
 }
