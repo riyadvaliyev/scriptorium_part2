@@ -151,7 +151,6 @@ function regexCleaningInput(language, inputString){
         return cleanedInputString;
     }
     
-    
 }
 
 /*
@@ -255,6 +254,9 @@ async function dockerCompileCode(inputCode, language, stdin) {
     }
     else if (language === "go"){
         containerName = "go_container";
+    }
+    else if (language === "r"){
+        containerName = "r_container";
     }
     
     // Determine the docker execution command to run
@@ -367,20 +369,10 @@ async function dockerCompileCode(inputCode, language, stdin) {
     
         // Command to run the code with stdin handling
         codeCommand = `echo '${cleanedStdin}' | docker exec -i '${containerName}' timeout --signal=SIGKILL 20s sh -c '/tmp/${tempGoFileName}'`;
-    }    
-    //     else if (language === "rust"){
-//         // Rust requires compilation using `cargo` or `rustc`
-//         // Write the code to a temporary file
-//         const tempRustFileName = "tempRustFile.rs";
-//         fs.writeFileSync(tempRustFileName, cleanedInputCode);
-
-//         // Compile the Rust file using rustc (Rust's compiler)
-//         const { stderr } = await execAsync(`rustc ${tempRustFileName}`);
-//         warnings = stderr; // Capture any warnings from the compilation
-
-//         // Run the compiled Rust program (default executable is the name of the source file without extension)
-//         codeCommand = `echo "${cleanedStdin}" | ./tempRustFile`;  // The compiled executable will be `tempRustFile` by default
-//     }
+    }
+    else if (language === "r"){
+        codeCommand = `echo "${cleanedStdin}" | docker exec -i '${containerName}' Rscript -e "${cleanedInputCode}"`;
+    }
     return { codeCommand, warnings }
 
 }

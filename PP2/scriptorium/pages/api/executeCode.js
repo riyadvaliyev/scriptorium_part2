@@ -47,7 +47,7 @@ export default async function handler(req, res) {
 export async function executingCode(inputCode, language, stdin) {
     // Define a set of supported languages
     const setOfSupportedLanguages = new Set(["c", "c++", "java", "python", "javascript", 
-        "ruby", "rust", "go"]);
+        "ruby", "rust", "go", "r"]);
 
     // Check if required fields are defined 
     if (!inputCode || !language) {
