@@ -35,6 +35,8 @@ interface ForkButtonProps {
         let modified_tags = tags.split(',');
         // trim each tag's front and back bc there might be leading/trailing spaces by accident
         modified_tags = modified_tags.map(tag => tag.trim());
+        // then remove any empty strings
+        modified_tags = modified_tags.filter(tag => tag !== "");
         // append each tag to params
         console.log("tags:", modified_tags);
         // format into tags: [ {name: "tag1"}, {name: "tag2"}, ... ]
@@ -86,7 +88,7 @@ interface ForkButtonProps {
             }));
             router.push({ pathname: `/editor/${template.id}` });
 
-            // window.alert("Template forked successfully!");
+            window.alert("Template forked successfully!");
             // console.log("data:", data);
             // window.location.href = `/templates/${template.id}`
         }
