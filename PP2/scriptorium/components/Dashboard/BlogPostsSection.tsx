@@ -14,6 +14,34 @@ const BlogPostsSection: React.FC = () => {
   const [error, setError] = useState('');
   const router = useRouter();
 
+  // Delete blog post
+  const handleDelete = async (postId: number) => {
+    if (!confirm("Are you sure you want to delete this post?")) return;
+
+    try {
+      const response = await fetch("/api/blog/deletePost", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify({ postId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete blog post.");
+      }
+
+      // Update state to remove the deleted post
+      setBlogPosts((prev) => prev.filter((post) => post.id !== postId));
+      alert("Blog post deleted successfully.");
+    } catch (error) {
+      console.error("Error deleting blog post:", error);
+      alert("Failed to delete blog post. Please try again.");
+    }
+  };
+
   useEffect(() => {
     const fetchBlogPosts = async () => {
       try {
@@ -33,16 +61,11 @@ const BlogPostsSection: React.FC = () => {
         }
     
         const data = await response.json();
-    
-        console.log('API Response Data:', data);
-    
+        
         // Filter by authorId if needed
         const userId = parseInt(localStorage.getItem('userId') || '0', 10);
-        console.log('User ID from localStorage:', userId);
         const blogPosts = data.posts.filter((post: BlogPost) => post.authorId === userId);
         
-        console.log('Blog posts state:', blogPosts);
-
         setBlogPosts(blogPosts);
       } catch (err) {
         console.error('Error fetching blog posts:', err);
@@ -71,6 +94,12 @@ const BlogPostsSection: React.FC = () => {
                   className="text-blue-500 hover:underline"
                 >
                   Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(post.id)}
+                  className="text-red-500 hover:underline"
+                >
+                  Delete
                 </button>
               </div>
             </li>
