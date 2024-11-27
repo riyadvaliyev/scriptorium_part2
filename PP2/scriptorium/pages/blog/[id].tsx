@@ -187,8 +187,18 @@ const BlogPostDetail: React.FC = () => {
           >
             - {post?.downvotes || 0}
           </button>
+          <button
+            className="text-blue-500 font-bold ml-4"
+            onClick={() =>
+              router.push({
+                pathname: "/report",
+                query: { contentType: "BlogPost", blogPostId: post.id },
+              })
+            }
+          >
+            Report
+          </button>
         </div>
-
         {/* Code Templates Section */}
         <div className="mt-6 mb-6">
           <h2 className="text-2xl font-semibold mb-4">Code Templates</h2>

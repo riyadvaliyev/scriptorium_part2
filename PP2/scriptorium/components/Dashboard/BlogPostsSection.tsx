@@ -6,6 +6,7 @@ interface BlogPost {
   title: string;
   content: string;
   createdAt: string;
+  hidden: boolean;
   authorId: number; // Filtering by author ID if needed
 }
 
@@ -88,13 +89,27 @@ const BlogPostsSection: React.FC = () => {
             <li key={post.id} className="p-4 border rounded shadow">
               <h3 className="text-xl font-semibold">{post.title}</h3>
               <p className="text-sm text-gray-500">Created on: {new Date(post.createdAt).toLocaleDateString()}</p>
+              <p>
+                  <strong>Status:</strong>{' '}
+                  <span className={post.hidden ? 'text-red-500' : 'text-green-500'}>
+                    {post.hidden ? 'Hidden' : 'Visible'}
+                  </span>
+                </p>
               <div className="mt-2 space-x-4">
-                <button
+                {!post.hidden && (
+                  <button
+                    onClick={() => router.push(`/editPost/${post.id}`)}
+                    className="text-blue-500 hover:underline"
+                  >
+                    Edit
+                  </button>
+                )}
+                {/* <button
                   onClick={() => router.push(`/editPost/${post.id}`)}
                   className="text-blue-500 hover:underline"
                 >
                   Edit
-                </button>
+                </button> */}
                 <button
                   onClick={() => handleDelete(post.id)}
                   className="text-red-500 hover:underline"
