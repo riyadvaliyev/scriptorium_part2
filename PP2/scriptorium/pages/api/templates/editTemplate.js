@@ -22,7 +22,7 @@ export default async function handler(req, res) {
             return res.status(401).json({ error: "Unauthorized" });
         } else if (!templateId) {
             return res.status(400).json({ error: "Template ID is required." });
-        } else if (!language || !["javascript", "python", "java", "c++", "c"].includes(language.toLowerCase())) {
+        } else if (!language || !["javascript", "python", "java", "c++", "c", "rust", "go", "r", "c#", "ruby"].includes(language.toLowerCase())) {
             return res.status(400).json({ error: "Valid language is required." });
         }
 
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
             // 404 request because it wasn't found and 403 because they're trying to access an unauthorized resource.
             if (!template) {
                 return res.status(404).json({ error: "Template not found." });
-            } else if (template.authorId !== verified_token.userId) {
+            } else if (template.authorId !== verified_token.id) {
                 return res.status(403).json({ error: "Forbidden Modification." });
             }
     
@@ -99,7 +99,7 @@ export default async function handler(req, res) {
             // 404 request because it wasn't found and 403 because they're trying to access an unauthorized resource.
             if (!template) {
                 return res.status(404).json({ error: "Template not found." });
-            } else if (template.authorId !== verified_token.userId) {
+            } else if (template.authorId !== verified_token.id) {
                 return res.status(403).json({ error: "Forbidden Deletion." });
             }
 
