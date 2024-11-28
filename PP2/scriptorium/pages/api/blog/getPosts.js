@@ -27,6 +27,7 @@ export default async function handler(req, res) {
       where: whereClause,
       include: {
         tags: true,
+        author: { select: { firstName: true, lastName: true } },
         codeTemplateLinks: true,
       },
       orderBy: { createdAt: 'desc' },
