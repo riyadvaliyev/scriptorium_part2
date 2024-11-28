@@ -74,6 +74,7 @@ export default async function handler(req, res) {
             orderBy: { id: 'desc' },  // descending
             include: {
                 tags: true,
+                user: true,
             }
         });
 
