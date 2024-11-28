@@ -7,12 +7,12 @@ const languages = {
     javascript: 'JavaScript',
     python: 'Python',
     java: 'Java',
-    csharp: 'C#',
+    lisp: 'Lisp',
     ruby: 'Ruby',
     go: 'Go',
     rust: 'Rust',
     c: 'C',
-    cpp: 'C++',
+    'c++': 'C++',
     r: 'R',
 }
 

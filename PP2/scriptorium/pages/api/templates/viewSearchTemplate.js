@@ -54,12 +54,15 @@ export default async function handler(req, res) {
         }
 
         if (tags) {
+            tags_arr = tags_arr.map(tag => tag.toLowerCase());
             filter_settings.tags = {
                 some: {
-                    name: {
-                        in: tags_arr,
-                    }
-                }
+                    OR: tags_arr.map(tag => ({
+                        name: {
+                            contains: tag,
+                        },
+                    })),
+                },
             }
         }
 
@@ -68,7 +71,10 @@ export default async function handler(req, res) {
             where: filter_settings,
             skip: skip,
             take: intPageSize,
-            orderBy: { id: 'desc' }  // descending
+            orderBy: { id: 'desc' },  // descending
+            include: {
+                tags: true,
+            }
         });
 
         const count = await prisma.codeTemplate.count();

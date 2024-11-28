@@ -53,6 +53,8 @@ const Template: React.FC = () => {
                 let tags = tagsSearchTerm.split(',');
                 // trim each tag's front and back bc there might be leading/trailing spaces by accident
                 tags = tags.map(tag => tag.trim());
+                // then remove any empty strings
+                tags = tags.filter(tag => tag !== "");
                 // append each tag to params
                 tags.forEach(tag => { params.append('tags', tag); });
                 // console.log("tags:", tags);

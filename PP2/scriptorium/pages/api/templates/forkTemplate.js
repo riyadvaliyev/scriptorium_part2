@@ -32,7 +32,7 @@ export default async function handler(req, res) {
         }
 
         // language check:
-        if (!language || !["javascript", "python", "java", "c++", "c", "ruby", "go", "rust", "r", "c#"].includes(language.toLowerCase())) {
+        if (!language || !["javascript", "python", "java", "c++", "c", "ruby", "go", "rust", "r", "lisp"].includes(language.toLowerCase())) {
             return res.status(400).json({ error: "Valid language is required.", errorId: 2 });
         } else if (!title) {
             return res.status(400).json({ error: "Title is required.", errorId: 2 });

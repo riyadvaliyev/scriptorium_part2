@@ -70,8 +70,10 @@ interface SaveButtonProps {
             // console.log("here first")
             router.push('/login');
         } else if (data.error) {
-            console.log("Error saving template", data.error);
-            window.alert("Error saving template. Please try again later."); 
+            // console.log("Error saving template", data.error);
+            // window.alert("Error saving template. Please try again later."); 
+
+            throw new Error(data.error);
         }
         else {
             // console.log("Saved template ID:", template.id);
@@ -108,7 +110,7 @@ interface SaveButtonProps {
             //   window.prompt("You must be logged in to save a template. Please log in.");
         } else {
             // console.error("Error saving template", error);
-            window.alert("Error saving template. Please try again later.");
+            window.alert(`Error saving template. ${error.message}`);
         }
       }
     };
