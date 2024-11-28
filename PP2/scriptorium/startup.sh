@@ -21,6 +21,7 @@ npx prisma generate
 
 # Create the admin user (if applicable)
 node createAdmin.js
+cp startup.env .env
 
 # Start up Docker containers
 # Note: Even thought the docker containers are in the docker folder, we're still running them in the current directory
