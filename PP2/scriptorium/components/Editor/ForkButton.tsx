@@ -47,7 +47,7 @@ interface ForkButtonProps {
   
       try {
         const forkData = {
-          title: title,
+          title: title + " fork",
           explanation: explanation,
           language: language,
           tags: modified_tags_json,
@@ -79,7 +79,7 @@ interface ForkButtonProps {
             // console.log("Forked template ID:", template.id);
             localStorage.setItem('editorData', JSON.stringify({
                 templateId: template.id,
-                title: title,
+                title: title + " fork",
                 explanation: explanation,
                 code: code,
                 language: language,
