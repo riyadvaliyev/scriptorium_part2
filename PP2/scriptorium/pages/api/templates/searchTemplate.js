@@ -38,14 +38,19 @@ export default async function handler(req, res) {
                 contains: title,
             }
         }
-
+        
+        // console.log(tags_arr);
+        
         if (tags) {
+            tags_arr = tags_arr.map(tag => tag.toLowerCase());
             filter_settings.tags = {
                 some: {
-                    name: {
-                        in: tags_arr,
-                    }
-                }
+                    OR: tags_arr.map(tag => ({
+                        name: {
+                            contains: tag,
+                        },
+                    })),
+                },
             }
         }
 
