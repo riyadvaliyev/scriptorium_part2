@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     const verified_token = verifyToken(req, res);
 
     if (!verified_token) {
-        return res.status(401).json({ error: "Invalid token" });
+        return res.status(401).json({ error: "Invalid token", errorId: 1 });
     } else if (!title || !explanation || !tags || !code || !language) {
         return res.status(400).json({ error: "All fields title, explanation, tags, code, and language are required." });
     }
@@ -32,10 +32,15 @@ export default async function handler(req, res) {
     let loweredLanguage = language.toLowerCase();
 
     if (!user) {
-        return res.status(401).json({ error: "User not found" });
-    } else if (loweredLanguage !== "javascript" && loweredLanguage !== "python" 
-        && loweredLanguage !== "java" && loweredLanguage !== "c++" && loweredLanguage !== "c") {
-        return res.status(400).json({ error: "Invalid language" });
+        return res.status(401).json({ error: "User not found", errorId: 3 });
+    } 
+    // else if (loweredLanguage !== "javascript" && loweredLanguage !== "python" 
+    //     && loweredLanguage !== "java" && loweredLanguage !== "c++" && loweredLanguage !== "c") {
+    //     return res.status(400).json({ error: "Invalid language" });
+    // }
+
+    if (!language || !["javascript", "python", "java", "c++", "c", "ruby", "go", "rust", "r", "lisp"].includes(language.toLowerCase())) {
+      return res.status(400).json({ error: "Valid language is required." });
     }
 
     try {
@@ -68,6 +73,10 @@ export default async function handler(req, res) {
               tags: {
                 connect: newTags.map(tag => ({ id: tag.id })),
               },
+            },
+            include: {
+              tags: true,
+              user: true,
             },
           });
 

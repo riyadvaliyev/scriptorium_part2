@@ -17,10 +17,16 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid rating value' });
   }
 
+  const numericPostId = parseInt(postId, 10); // Convert postId to a number
+
+  if (isNaN(numericPostId)) {
+    return res.status(400).json({ error: 'Invalid postId' });
+  }
+
   try {
     // Check if user has already rated this post
     const existingRating = await prisma.rating.findFirst({
-      where: { userId: user.id, blogPostId: postId },
+      where: { userId: user.id, blogPostId: numericPostId }, // Use numericPostId
     });
 
     let updatedPost;
@@ -29,13 +35,13 @@ export default async function handler(req, res) {
       // If rating exists, update the upvotes/downvotes count
       if (existingRating.ratingValue !== ratingValue) {
         updatedPost = await prisma.blogPost.update({
-          where: { id: postId },
+          where: { id: numericPostId }, // Use numericPostId
           data: {
             upvotes: { increment: ratingValue === 1 ? 1 : -1 },
             downvotes: { increment: ratingValue === 0 ? 1 : -1 },
           },
         });
-        
+
         // Update the rating record
         await prisma.rating.update({
           where: { id: existingRating.id },
@@ -48,12 +54,12 @@ export default async function handler(req, res) {
         data: {
           ratingValue,
           userId: user.id,
-          blogPostId: postId,
+          blogPostId: numericPostId, // Use numericPostId
         },
       });
 
       updatedPost = await prisma.blogPost.update({
-        where: { id: postId },
+        where: { id: numericPostId }, // Use numericPostId
         data: {
           upvotes: { increment: ratingValue === 1 ? 1 : 0 },
           downvotes: { increment: ratingValue === 0 ? 1 : 0 },

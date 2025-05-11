@@ -1,115 +1,136 @@
-import Image from "next/image";
-import localFont from "next/font/local";
+import React, { useEffect, useState } from 'react';
+import Navbar from '../components/Shared/Navbar';
+import { useRouter } from 'next/router';
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+interface BlogPost {
+  id: number;
+  title: string;
+  content: string;
+  upvotes: number;
+}
 
-export default function Home() {
+interface Template {
+  id: number;
+  title: string;
+  explanation: string;
+  language: string;
+}
+
+const LandingPage: React.FC = () => {
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchFeaturedContent = async () => {
+      try {
+        // Fetch top 3 blog posts
+        const blogResponse = await fetch('/api/blog/getPosts');
+        if (!blogResponse.ok) throw new Error('Failed to fetch blog posts');
+        const blogData = await blogResponse.json();
+        const sortedPosts = blogData.posts
+          .sort((a: BlogPost, b: BlogPost) => b.upvotes - a.upvotes)
+          .slice(0, 3);
+        setBlogPosts(sortedPosts);
+
+        // Fetch top 3 templates
+        const templateResponse = await fetch('/api/templates/searchTemplate');
+        if (!templateResponse.ok) throw new Error('Failed to fetch templates');
+        const templateData = await templateResponse.json();
+        const featuredTemplates = templateData.data
+          .slice(0, 3); // Assuming no specific criteria; showing the first 3
+        setTemplates(featuredTemplates);
+      } catch (error) {
+        console.error('Error fetching featured content:', error);
+      }
+    };
+
+    fetchFeaturedContent();
+  }, []);
+
   return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              pages/index.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div>
+      {/* Navigation Bar */}
+      <Navbar />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Welcome Section */}
+      <div className="bg-blue-600 text-white py-12">
+        <div className="container mx-auto text-center">
+          <h1 className="text-4xl font-bold">Welcome to Scriptorium</h1>
+          <p className="text-xl mt-2">Where ideas come alive in code and words</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+
+      {/* Featured Section */}
+      <div className="container mx-auto p-6">
+        <h2 className="text-3xl font-semibold mb-4 text-center">Featured Content</h2>
+
+        {/* Blog Posts Section */}
+        <div className="mb-8">
+          <h3 className="text-2xl font-bold mb-3">Top Blog Posts</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {blogPosts.length > 0 ? (
+              blogPosts.map((post) => (
+                <div
+                  key={post.id}
+                  className="p-4 bg-white shadow rounded hover:shadow-lg transition"
+                  onClick={() => router.push(`/blog/${post.id}`)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <h4 className="text-xl font-semibold">{post.title}</h4>
+                  <p className="mt-2 text-sm text-gray-500 line-clamp-2">{post.content}</p>
+                  <p className="mt-2 text-green-500 font-medium">Upvotes: {post.upvotes}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">No blog posts available to feature.</p>
+            )}
+          </div>
+          <div className="text-center mt-4">
+            <button
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              onClick={() => router.push('/blog')}
+            >
+              Explore More Blog Posts
+            </button>
+          </div>
+        </div>
+
+        {/* Templates Section */}
+        <div>
+          <h3 className="text-2xl font-bold mb-3">Top Code Templates</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {templates.length > 0 ? (
+              templates.map((template) => (
+                <div
+                  key={template.id}
+                  className="p-4 bg-white shadow rounded hover:shadow-lg transition"
+                  onClick={() => router.push('/templates')}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <h4 className="text-xl font-semibold">{template.title}</h4>
+                  <p className="mt-2 text-sm text-gray-500 line-clamp-2">{template.explanation}</p>
+                  <p className="mt-2 text-blue-500 font-medium">Language: {template.language}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">No code templates available to feature.</p>
+            )}
+          </div>
+          <div className="text-center mt-4">
+            <button
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              onClick={() => router.push('/templates')}
+            >
+              Explore More Code Templates
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default LandingPage;
+
+

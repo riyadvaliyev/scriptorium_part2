@@ -1,0 +1,158 @@
+version: '3.8'
+
+services:
+  python_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.Python  # Path to the Dockerfile in the current folder
+    container_name: python_container
+    image: python_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
+
+  javascript_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.Javascript  # Path to the Dockerfile in the current folder
+    container_name: javascript_container
+    image: javascript_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
+
+  java_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.Java  # Path to the Dockerfile in the current folder
+    container_name: java_container
+    image: java_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
+
+  c_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.C  # Path to the Dockerfile for C
+    container_name: c_container
+    image: c_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
+
+  cpp_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.Cpp  # Path to the Dockerfile for C++
+    container_name: cpp_container
+    image: cpp_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
+
+  ruby_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.Ruby  # Path to the Dockerfile for Ruby
+    container_name: ruby_container
+    image: ruby_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
+
+  rust_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.Rust  # Path to the Dockerfile for Swift
+    container_name: rust_container
+    image: rust_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
+
+  go_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.Go  # Path to the Dockerfile for Swift
+    container_name: go_container
+    image: go_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
+  
+  r_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.R  # Path to the Dockerfile for Swift
+    container_name: r_container
+    image: r_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
+  
+  lisp_service:
+    build:
+      context: .  # Set the context to the current folder (docker)
+      dockerfile: DockerFile.Lisp  # Path to the Dockerfile for Swift
+    container_name: lisp_container
+    image: lisp_image
+    networks:
+      - scriptorium_network
+    tty: true  # Keeps the container running
+    deploy:
+      resources:
+        limits:
+          # memory: 512m  # Set memory limit to 512 MB
+          memory: 256m  # Set memory limit to 512 MB
+
+
+
+networks:
+  scriptorium_network:
+    driver: bridge

@@ -22,11 +22,12 @@ export default async function handler(req, res) {
           data: { firstName, lastName, email, password: hashedPassword, phoneNumber, role: "USER", avatar: avatarPath }
         });
   
-        const accessToken = jwt.sign({ id: user.id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+        const accessToken = jwt.sign({ id: user.id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '60m' });
+        
         const refreshToken = jwt.sign({ id: user.id, role: user.role }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
   
         // Send success response if user creation is successful
-        return res.status(201).json({ accessToken, refreshToken });
+        return res.status(201).json({ id: user.id, accessToken, refreshToken });
       } catch (error) {
         // Log the error to identify its source
         console.error("Signup error:", error);

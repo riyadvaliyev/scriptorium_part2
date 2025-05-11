@@ -20,7 +20,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ message: "Must be a GET request." });
     }
 
-    const { title, explanation, tempTags, page, pageSize } = req.query;
+    const { title, explanation, tags, page, pageSize } = req.query;
     const verified_token = verifyToken(req, res);
 
     if (!verified_token) {
@@ -31,13 +31,16 @@ export default async function handler(req, res) {
     const intPageSize = parseInt(pageSize) || 10;
     const skip = (intPage - 1) * intPageSize;
 
-    if (tempTags && !Array.isArray(tempTags)) {
-        var tags = [tempTags];
+    if (tags && !Array.isArray(tags)) {
+        var tags_arr = [tags];
+    } else if (tags) {
+        var tags_arr = tags
     }
 
     try {
+        // console.log(verified_token.id);
         const filter_settings = {
-            userId: verified_token.userId,
+            userId: verified_token.id,
         }
         if (title) {
             filter_settings.title = {
@@ -51,12 +54,15 @@ export default async function handler(req, res) {
         }
 
         if (tags) {
+            tags_arr = tags_arr.map(tag => tag.toLowerCase());
             filter_settings.tags = {
-                every: {
-                    name: {
-                        in: tags,
-                    }
-                }
+                some: {
+                    OR: tags_arr.map(tag => ({
+                        name: {
+                            contains: tag,
+                        },
+                    })),
+                },
             }
         }
 
@@ -65,19 +71,31 @@ export default async function handler(req, res) {
             where: filter_settings,
             skip: skip,
             take: intPageSize,
-            orderBy: { id: 'desc' }  // descending
+            orderBy: { id: 'desc' },  // descending
+            include: {
+                tags: true,
+                user: true,
+            }
         });
 
         const count = await prisma.codeTemplate.count();
         const totalPages = Math.ceil(count / intPageSize);
+        const filteredCount = await prisma.codeTemplate.count(
+            { 
+                where: filter_settings
+            }
+        );
+        const filteredTotalPageCount = Math.ceil(filteredCount / intPageSize);
 
         res.status(200).json({
             data: templates,
             meta: {
-              currentPage: intPage,
-              pageSize: intPageSize,
-              totalPages: totalPages,
-              totalCount: count,
+                currentPage: intPage,
+                pageSize: intPageSize,
+                totalPages: totalPages,
+                filteredTotalPageCount: filteredTotalPageCount,
+                filteredTotalCount: filteredCount,
+                totalCount: count,
             }
           });
     } catch (error) {

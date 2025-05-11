@@ -1,0 +1,23 @@
+# Use the official Rust base image
+FROM rust:1.82.0-slim
+
+# Install timeout command (part of coreutils)
+RUN apt-get update && apt-get install -y coreutils
+
+# Create a non-root user and set it as the current user
+RUN useradd -m nonrootuser
+
+# Switch to the non-root user
+USER nonrootuser
+
+# Set the working directory inside the container
+WORKDIR /scriptorium_docker_files
+
+# Copy the Rust project files into the container
+COPY . .
+
+# Verify the Rust installation
+RUN rustc --version
+
+# Default command to keep the container running (optional)
+CMD ["bash"]

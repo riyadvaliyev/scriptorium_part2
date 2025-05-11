@@ -6,44 +6,35 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { searchTerm, page = 1, pageSize = 10 } = req.query;
+  const { searchTerm } = req.query;
 
   try {
-    // Step 1: Define the search criteria for multiple search terms
-    const terms = Array.isArray(searchTerm) ? searchTerm : [searchTerm];
+    // Step 1: Handle empty or undefined search term
+    const terms = searchTerm ? (Array.isArray(searchTerm) ? searchTerm : [searchTerm]) : [];
     const whereClause = terms.length
       ? {
-          OR: terms.flatMap(term => [
-            { title: { contains: term, lte: 'insensitive' } },
-            { content: { contains: term, lte: 'insensitive' } },
-            { tags: { some: { name: { contains: term, lte: 'insensitive' } } } },
-            { codeTemplateLinks: { some: { title: { contains: term, lte: 'insensitive' } } } },
+          OR: terms.flatMap((term) => [
+            { title: { contains: term, mode: 'insensitive' } },
+            { content: { contains: term, mode: 'insensitive' } },
+            { tags: { some: { name: { contains: term, mode: 'insensitive' } } } },
+            { codeTemplateLinks: { some: { title: { contains: term, mode: 'insensitive' } } } },
           ]),
         }
-      : {};
+      : {}; // No filter if no search term provided
 
-    // Step 2: Fetch blog posts with pagination
+    // Step 2: Fetch all blog posts matching the criteria
     const blogPosts = await prisma.blogPost.findMany({
       where: whereClause,
       include: {
         tags: true,
+        author: { select: { firstName: true, lastName: true } },
         codeTemplateLinks: true,
       },
-      skip: (page - 1) * pageSize,
-      take: parseInt(pageSize),
       orderBy: { createdAt: 'desc' },
     });
 
-    // Step 3: Get total count for pagination
-    const totalPosts = await prisma.blogPost.count({ where: whereClause });
-    const totalPages = Math.ceil(totalPosts / pageSize);
-
     res.status(200).json({
-      posts: blogPosts,
-      currentPage: parseInt(page),
-      pageSize: parseInt(pageSize),
-      totalPosts,
-      totalPages,
+      posts: blogPosts, // Return all posts
     });
   } catch (error) {
     console.error('Error fetching blog posts:', error);
